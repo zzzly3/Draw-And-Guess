@@ -4,7 +4,7 @@ import {DrawAndGuess, Player} from './game';
 
 const io = new Server(3000, {
     cors: {
-        origin: 'http://localhost:8080'
+        origin: '*'
     }
 })
 const emitter = new Emitter(io)
