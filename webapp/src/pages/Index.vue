@@ -2,7 +2,10 @@
   <div class="fullscreen column content-start">
     <div class="col-1" style="overflow: auto">
       <q-bar class="full-height full-width row bg-header">
-        <span class="text-center col self-center">
+        <div class="col-2 self-center full-height">
+          <q-img src="~assets/nnq.jpg" height="100%" fit="scale-down" />
+        </div>
+        <span class="text-center col self-center q-mr-xl">
           <span>狮子山庄 - 你画我猜</span>
           <br/>
           <span v-if="!connected" class="text-negative">连接断开</span>
@@ -48,7 +51,7 @@
       </q-bar>
     </div>
     <div class="col full-width q-pa-md" style="overflow: auto">
-      <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding"
+      <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
         <q-item :key="index" dense>
           <q-item-section>
