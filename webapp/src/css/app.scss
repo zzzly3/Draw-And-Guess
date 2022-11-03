@@ -1,0 +1,16 @@
+// app global css in SCSS form
+.bg-body {
+  background-color: $amber-2
+}
+
+.bg-outstanding {
+  background-color: $amber-1;
+}
+
+.bg-header {
+  background-color: $amber-12
+}
+
+body {
+  @extend .bg-body
+}
