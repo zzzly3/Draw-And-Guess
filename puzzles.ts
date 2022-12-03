@@ -32,3 +32,25 @@ export function random_puzzles(n: number) {
     }
     return id
 }
+
+export function add_puzzle(puzzle: Puzzle) {
+    puzzle.word = puzzle.word.replace(/\s|\r/, '')
+    const t = puzzles.find(i => i.word === puzzle.word)
+    if (t)
+        console.log('Duplicated word', t)
+    else if (puzzle.word.length === 0)
+        console.log('Empty word', puzzle)
+    else
+        puzzles.push(puzzle)
+}
+
+export function sync_puzzle() {
+    puzzles.sort((a, b) => {
+        if (a.hint < b.hint)
+            return -1
+        if (a.hint > b.hint)
+            return 1
+        return 0
+    })
+    fs.writeFileSync('puzzles.txt', puzzles.map(i => `${i.word},${i.hint}`).join('\n'))
+}

@@ -161,24 +161,29 @@ export default defineComponent({
 
     onMounted(() => {
       if (!store.state.gameData.token) {
-        let token = Number(sessionStorage.getItem('token'))
-        if (!token) {
-          token = ((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000)
-          sessionStorage.setItem('token', String(token))
+        const token = sessionStorage.getItem('token')
+        const name = sessionStorage.getItem('name')
+        if (!token || !name) {
+          $q.dialog({
+            title: '登录',
+            message: '输入一个昵称',
+            prompt: {
+              model: '',
+              isValid: val => val.length > 2,
+              type: 'text'
+            },
+            persistent: true
+          }).onOk(data => {
+            const name = String(data)
+            const token = String(((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000))
+            sessionStorage.setItem('name', name)
+            sessionStorage.setItem('token', token)
+            void store.dispatch('gameData/connect', {token, name})
+          })
+        } else {
+          console.log(token, name)
+          void store.dispatch('gameData/connect', {token, name})
         }
-        console.log(token)
-        $q.dialog({
-          title: '登录',
-          message: '输入一个昵称',
-          prompt: {
-            model: '',
-            isValid: val => val.length > 2,
-            type: 'text'
-          },
-          persistent: true
-        }).onOk(data => {
-          void store.dispatch('gameData/connect', {token, name: String(data)})
-        })
       }
     })
 

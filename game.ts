@@ -198,7 +198,7 @@ export class DrawAndGuess
                 p = null
         } else {
             this.players.forEach(player => {
-                if (player.get_online())
+                if (p === null && player.get_online())
                     p = player
             })
             this.beginner = p
@@ -265,6 +265,7 @@ export class DrawAndGuess
 
     end() {
         // Game End
+        this.update_all()
         this.reset()
         this.emit('end')
         const to_leave: Player[] = []
