@@ -186,7 +186,7 @@ export class DrawAndGuess
     }
 
     next_round() {
-        let p = null
+        let p:Player|null = null
         if (this.beginner && this.painter) {
             p = this.painter.get_next()
             while (p !== this.beginner) {
