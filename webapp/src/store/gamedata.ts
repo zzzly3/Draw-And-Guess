@@ -209,6 +209,9 @@ const gameData = {
     },
     answer({}, msg: string) {
       socket?.volatile.emit('answer', msg)
+    },
+    command({}, cmd: string) {
+      socket?.volatile.emit('command', cmd)
     }
   } as ActionTree<GameData, StateInterface>
 } as Module<GameData, StateInterface>

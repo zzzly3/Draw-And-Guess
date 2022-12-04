@@ -45,7 +45,7 @@ export class Emitter
     emit(to: number, type: string, data?: any) {
         if (data)
             data = JSON.parse(JSON.stringify(data))
-        if (['start', 'end', 'join', 'leave', 'chat', 'gain'].indexOf(type) > -1)
+        if (['start', 'end', 'join', 'leave', 'chat', 'gain', 'selection'].indexOf(type) > -1)
             console.log(type, data)
         this.messages.push({to, type, data})
     }

@@ -185,7 +185,7 @@ export class DrawAndGuess
         this.update_all()
     }
 
-    next_round() {
+    private next_round() {
         let p:Player|null = null
         if (this.beginner && this.painter) {
             p = this.painter.get_next()
@@ -263,20 +263,11 @@ export class DrawAndGuess
             player.chat(msg)
     }
 
-    end() {
+    private end() {
         // Game End
         this.update_all()
-        this.reset()
         this.emit('end')
-        const to_leave: Player[] = []
-        this.players.forEach(player => {
-            if (!player.get_online())
-                to_leave.push(player)
-        })
-        for (let player of to_leave) {
-            this.leave(player)
-        }
-        this.update_all()
+        this.reset()
     }
 
     private reset_timer(elapse: number) {
@@ -299,6 +290,11 @@ export class DrawAndGuess
         this.update_all()
     }
 
+    force_reset() {
+        this.reset()
+        this.update_all()
+    }
+
     private reset() {
         this.state = GameState.Wait
         this.painter = null
@@ -306,8 +302,15 @@ export class DrawAndGuess
         this.success = new Set()
         this.puzzle = {word: '', hint: ''}
         this.reset_timer(-1)
+        const to_leave: Player[] = []
         this.players.forEach(player => {
-            player.reset_point()
+            if (!player.get_online())
+                to_leave.push(player)
+            else
+                player.reset_point()
         })
+        for (let player of to_leave) {
+            this.leave(player)
+        }
     }
 }

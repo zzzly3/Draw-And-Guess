@@ -35,6 +35,14 @@ io.on("connection", socket => {
                 emitter.leave(player.token)
             }
         })
+        socket.on('command', (cmd: string) => {
+            console.log(player.name, cmd)
+            switch (cmd) {
+                case 'force-reset':
+                    game.force_reset()
+                    break
+            }
+        })
     })
 })
 

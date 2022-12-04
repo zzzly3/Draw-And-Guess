@@ -143,7 +143,11 @@ export default defineComponent({
     const send_text = ref('')
     const send = () => {
       if (send_text.value) {
-        void store.dispatch('gameData/answer', send_text.value)
+        if (send_text.value[0] === '/') {
+          void store.dispatch('gameData/command', send_text.value.slice(1))
+        } else {
+          void store.dispatch('gameData/answer', send_text.value)
+        }
         send_text.value = ''
       }
     }
