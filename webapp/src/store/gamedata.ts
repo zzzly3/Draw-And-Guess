@@ -96,7 +96,7 @@ const gameData = {
         socket.connect()
         return
       }
-      socket = io(location.hostname + ':3000')
+      socket = io()
       socket.on('connect', () => {
         socket.emit('login', {token, name})
         commit('connect')

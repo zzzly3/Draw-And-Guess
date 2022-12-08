@@ -2,11 +2,7 @@ import {Server} from "socket.io";
 import {Emitter} from './emitter';
 import {DrawAndGuess, Player} from './game';
 
-const io = new Server(3000, {
-    cors: {
-        origin: '*'
-    }
-})
+const io = new Server(3000)
 const emitter = new Emitter(io)
 const game = new DrawAndGuess(emitter)
 
