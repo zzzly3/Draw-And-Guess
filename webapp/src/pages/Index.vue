@@ -65,9 +65,9 @@
     </div>
     <div class="col-1 full-width q-pl-lg q-pr-sm row" style="overflow: auto">
       <div class="col self-center">
-        <q-input outlined dense rounded v-model="send_text" bg-color="amber-1" :disable="painter===name">
+        <q-input outlined dense rounded v-model="send_text" bg-color="amber-1" @keypress.enter="send" :disable="painter===name">
           <template v-slot:after>
-            <q-btn round dense flat icon="send" color="primary" size="lg" @click="send" />
+            <q-btn round dense flat icon="send" color="primary" size="lg" @click="send" :disable="painter===name" />
           </template>
         </q-input>
       </div>
@@ -165,9 +165,13 @@ export default defineComponent({
 
     onMounted(() => {
       if (!store.state.gameData.token) {
-        const token = sessionStorage.getItem('token')
-        const name = sessionStorage.getItem('name')
-        if (!token || !name) {
+        let token = localStorage.getItem('token')
+        let name = sessionStorage.getItem('name')
+        if (!token) {
+          token = String(((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000))
+          localStorage.setItem('token', token)
+        }
+        if (!name) {
           $q.dialog({
             title: '登录',
             message: '输入一个昵称',
@@ -178,10 +182,8 @@ export default defineComponent({
             },
             persistent: true
           }).onOk(data => {
-            const name = String(data)
-            const token = String(((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000))
+            name = String(data)
             sessionStorage.setItem('name', name)
-            sessionStorage.setItem('token', token)
             void store.dispatch('gameData/connect', {token, name})
           })
         } else {

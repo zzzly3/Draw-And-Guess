@@ -110,7 +110,7 @@ const gameData = {
       })
       socket.on('chat', (data: {name: string|null, msg: string}) => {
         commit('add_msg', {
-          author: String(data.name),
+          author: data.name ? String(data.name) : '',
           content: data.msg,
           notify: data.name === null
         })
