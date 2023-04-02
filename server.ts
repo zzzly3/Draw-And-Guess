@@ -23,9 +23,10 @@ io.on("connection", socket => {
         socket.on('start', () => {
             game.start()
         })
-        socket.on('select', (id: number) => {
+        socket.on('select', ({id, custom}: {id: number, custom: string}) => {
             id = Number(id)
-            game.select(player, id)
+            custom = String(custom)
+            game.select(player, id, custom)
         })
         socket.on('answer', (msg: string) => {
             msg = String(msg)
@@ -37,14 +38,19 @@ io.on("connection", socket => {
                 emitter.leave(player.token)
             }
         })
-        socket.on('command', (cmd: string) => {
-            console.log(player.name, cmd)
-            switch (cmd) {
+        socket.on('command', (data: string) => {
+            console.log(player.name, data)
+            const cmd = data.split(' ')
+            switch (cmd[0]) {
                 case 'force-reset':
                     game.force_reset()
                     break
                 case 'version':
                     player.notify(version)
+                    break
+                case 'give-credit':
+                    if (Number(cmd[1]) > 0)
+                        player.give_credit(Number(cmd[1]))
                     break
             }
         })

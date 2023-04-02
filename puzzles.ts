@@ -16,7 +16,11 @@ for (let line of lines) {
 }
 
 export function get_puzzle_info(id: number) {
-    return puzzles[id]
+    return id >= 0 && id < puzzles.length ? puzzles[id] : null
+}
+
+export function custom_puzzle(word: string) {
+    return word.length > 0 && word.length < 10 ? {word, hint: '<自定义>'} : null
 }
 
 export function random_puzzles(n: number) {
@@ -30,7 +34,7 @@ export function random_puzzles(n: number) {
             }
         }
     }
-    return id
+    return id.map(i => ({id: i, word: puzzles[i].word}))
 }
 
 export function add_puzzle(puzzle: Puzzle) {

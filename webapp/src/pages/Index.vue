@@ -44,6 +44,9 @@
                    size="md" color="primary" outline>
               {{word.word}}
             </q-btn>
+            <q-btn @click="custom_select" size="md" color="positive" outline :disable="credit===0">
+              自定义 ({{credit}})
+            </q-btn>
           </span>
         </span>
       </q-bar>
@@ -128,12 +131,29 @@ export default defineComponent({
     const name = computed(() => {
       return store.state.gameData.name
     })
+    const credit = computed(() => {
+      return store.state.gameData.info.state.credit
+    })
 
     const selections = computed(() => {
       return store.state.gameData.selections
     })
     const select = (id: number) => {
-      void store.dispatch('gameData/select', id)
+      void store.dispatch('gameData/select', {id, custom: ''})
+    }
+    const custom_select = () => {
+      $q.dialog({
+        title: '自定义词语',
+        message: '输入一个词语（不超过9个字）',
+        prompt: {
+          model: '',
+          isValid: val => val.length > 0 && val.length < 10,
+          type: 'text'
+        },
+        cancel: true
+      }).onOk(data => {
+        void store.dispatch('gameData/select', {id: -1, custom: String(data)})
+      })
     }
 
     const start = () => {
@@ -174,7 +194,7 @@ export default defineComponent({
         if (!name) {
           $q.dialog({
             title: '登录',
-            message: '输入一个昵称',
+            message: '输入一个昵称（不少于3个字）',
             prompt: {
               model: '',
               isValid: val => val.length > 2,
@@ -195,8 +215,8 @@ export default defineComponent({
 
     return {
       connected,
-      name,
-      selections, select,
+      name, credit,
+      selections, select, custom_select,
       painter, players, messages,
       count_down, hint, answer,
       in_wait, in_select, in_draw,

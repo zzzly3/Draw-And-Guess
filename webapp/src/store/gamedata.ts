@@ -11,7 +11,8 @@ interface GameInfo {
     select: boolean,
     draw: boolean,
     hint: string,
-    answer: string
+    answer: string,
+    credit: number,
     timeout: number
   },
   players: {
@@ -55,7 +56,8 @@ const gameData = {
           draw: false,
           hint: '',
           answer: '',
-          timeout: 0
+          timeout: 0,
+          credit: 0
         },
         players: []
       },
@@ -141,10 +143,17 @@ const gameData = {
           notify: true
         })
       })
-      socket.on('gain', (data: {name: string, point: number}) => {
+      socket.on('gain-point', (data: {name: string, point: number}) => {
         commit('add_msg', {
           author: data.name,
           content: `分数【+${data.point}】！`,
+          notify: true
+        })
+      })
+      socket.on('gain-credit', (data: {amount: number}) => {
+        commit('add_msg', {
+          author: '',
+          content: `恭喜~你获得了${data.amount}张自定义词语卡，快去整点乐子吧！`,
           notify: true
         })
       })
@@ -204,8 +213,8 @@ const gameData = {
     start() {
       socket?.volatile.emit('start')
     },
-    select({}, id: number) {
-      socket?.volatile.emit('select', id)
+    select({}, data: {id: number, custom: string}) {
+      socket?.volatile.emit('select', data)
     },
     answer({}, msg: string) {
       socket?.volatile.emit('answer', msg)

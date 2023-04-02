@@ -1,15 +1,18 @@
 import {Emitter} from './emitter';
-import {get_puzzle_info, Puzzle, random_puzzles} from './puzzles';
+import {get_puzzle_info, custom_puzzle, Puzzle, random_puzzles} from './puzzles';
 
 const selection_num = 6
 const select_timeout = 40
 const draw_timeout = 80
+const reward_line = 10
+const reward_prob = 0.5
 
 export class Player
 {
     public name: string
     public token: number
     private point: number
+    private credit: number
     private online: boolean
     private list: {next: Player, prev: Player}
     private emitter: Emitter
@@ -18,6 +21,7 @@ export class Player
         this.name = name
         this.token = token
         this.point = 0
+        this.credit = 0
         this.list = {next: this, prev: this}
         this.online = false
         this.emitter = emitter
@@ -76,7 +80,7 @@ export class Player
 
     add_point(pt: number) {
         this.point += pt
-        this.emitter.emit(0, 'gain', {name: this.name, point: pt})
+        this.emitter.emit(0, 'gain-point', {name: this.name, point: pt})
     }
 
     get_point() {
@@ -85,6 +89,31 @@ export class Player
 
     reset_point() {
         this.point = 0
+    }
+
+    give_credit(amount: number) {
+        this.credit += amount
+        this.emitter.emit(this.token, 'gain-credit', {amount})
+    }
+
+    reset_credit() {
+        this.credit = 0
+    }
+
+    get_credit() {
+        return this.credit
+    }
+
+    cost_credit(cost: number) {
+        if (this.credit < cost)
+            return false
+        this.credit -= cost
+        return true
+    }
+
+    reward_credit() {
+        if (this.point > reward_line && Math.random() < reward_prob)
+            this.give_credit(1)
     }
 }
 
@@ -128,7 +157,8 @@ export class DrawAndGuess
                 draw: this.state === GameState.Draw,
                 timeout: this.timer_time,
                 hint: `${this.puzzle.word.length}字 ${this.puzzle.hint}`,
-                answer: ''
+                answer: '',
+                credit: 0
             },
             players: [] as {name: string, point: number, online: boolean, action: boolean, success: boolean}[]
         }
@@ -145,6 +175,7 @@ export class DrawAndGuess
             } else {
                 data.state.answer = ''
             }
+            data.state.credit = player.get_credit()
             player.emit('update-all', data)
         })
     }
@@ -228,19 +259,24 @@ export class DrawAndGuess
             this.painter = p
             this.state = GameState.Select
             this.success.clear()
-            this.painter.emit('selections', random_puzzles(selection_num).map(id => ({id, word: get_puzzle_info(id).word})))
+            this.painter.emit('selections', random_puzzles(selection_num))
             this.reset_timer(select_timeout)
         } else {
             this.end()
         }
     }
 
-    select(player: Player, id: number) {
+    select(player: Player, id: number, custom: string) {
         if (!this.validate(player) || this.painter !== player || this.state !== GameState.Select || isNaN(id))
             return
-        const p = get_puzzle_info(id)
+        const p = id === -1 ? custom_puzzle(custom) : get_puzzle_info(id)
         if (!p)
             return
+        if (id === -1) {
+            // custom puzzle
+            if (!player.cost_credit(1))
+                return
+        }
         // Draw Begin
         this.puzzle = p
         this.state = GameState.Draw
@@ -275,6 +311,7 @@ export class DrawAndGuess
         // Game End
         this.update_all()
         this.emit('end')
+        this.players.forEach(p => p.reward_credit())
         this.reset()
     }
 
