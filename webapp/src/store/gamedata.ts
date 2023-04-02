@@ -108,11 +108,11 @@ const gameData = {
         commit('updateAll', data)
         console.log(data)
       })
-      socket.on('chat', (data: {name: string, msg: string}) => {
+      socket.on('chat', (data: {name: string|null, msg: string}) => {
         commit('add_msg', {
-          author: data.name,
+          author: String(data.name),
           content: data.msg,
-          notify: false
+          notify: data.name === null
         })
       })
       socket.on('selections', (data: {id: number, word: string}[]) => {

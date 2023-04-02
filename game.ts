@@ -1,6 +1,10 @@
 import {Emitter} from './emitter';
 import {get_puzzle_info, Puzzle, random_puzzles} from './puzzles';
 
+const selection_num = 6
+const select_timeout = 40
+const draw_timeout = 80
+
 export class Player
 {
     public name: string
@@ -30,6 +34,10 @@ export class Player
 
     chat(msg: string) {
         this.emitter.emit(0, 'chat', {name: this.name, msg})
+    }
+
+    notify(msg: string) {
+        this.emitter.emit(this.token, 'chat', {name: null, msg})
     }
 
     get_next() {
@@ -220,8 +228,8 @@ export class DrawAndGuess
             this.painter = p
             this.state = GameState.Select
             this.success.clear()
-            this.painter.emit('selections', random_puzzles(6).map(id => ({id, word: get_puzzle_info(id).word})))
-            this.reset_timer(40)
+            this.painter.emit('selections', random_puzzles(selection_num).map(id => ({id, word: get_puzzle_info(id).word})))
+            this.reset_timer(select_timeout)
         } else {
             this.end()
         }
@@ -236,7 +244,7 @@ export class DrawAndGuess
         // Draw Begin
         this.puzzle = p
         this.state = GameState.Draw
-        this.reset_timer(80)
+        this.reset_timer(draw_timeout)
         this.update_all()
     }
 

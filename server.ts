@@ -1,6 +1,12 @@
 import {Server} from "socket.io";
 import {Emitter} from './emitter';
 import {DrawAndGuess, Player} from './game';
+import {statSync} from 'fs';
+
+const game_ver = statSync('./game.ts').mtime.toLocaleString()
+const puzzle_ver = statSync('./puzzles.txt').mtime.toLocaleString()
+const version = `Draw And Guess\nby zzzly3<z@tanre.cn>\nGame version: ${game_ver}\nPuzzle version: ${puzzle_ver}`
+console.log(version)
 
 const io = new Server(3000)
 const emitter = new Emitter(io)
@@ -37,12 +43,13 @@ io.on("connection", socket => {
                 case 'force-reset':
                     game.force_reset()
                     break
+                case 'version':
+                    player.notify(version)
+                    break
             }
         })
     })
 })
-
-
 
 setInterval(() => emitter.send(), 10)
 
