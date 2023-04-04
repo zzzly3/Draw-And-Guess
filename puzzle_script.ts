@@ -3,6 +3,6 @@ import {readFileSync} from 'fs'
 
 const data = readFileSync('plain.txt').toString().split('\n')
 for (const i of data) {
-    add_puzzle({word: i, hint: '动作'})
+    add_puzzle({word: i, hint: '常用软件'})
 }
 sync_puzzle()

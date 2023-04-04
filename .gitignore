@@ -2,3 +2,4 @@ node_modules
 .idea
 .fleet
 /plain.txt
+/puzzle_script.ts
