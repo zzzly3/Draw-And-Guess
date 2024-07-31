@@ -90,7 +90,7 @@ const gameData = {
   } as MutationTree<GameData>,
 
   actions: {
-    connect({state, commit}, {token, name}: {token: number, name: string}) {
+    connect({state, commit}, {token, name, drawfn}: {token: number, name: string, drawfn: (cmd: string) => void}) {
       if (state.connect)
         return
       commit('init', {token, name})
@@ -98,6 +98,7 @@ const gameData = {
         socket.connect()
         return
       }
+      drawfn('line 0 0 1000 1000')
       socket = io()
       socket.on('connect', () => {
         socket.emit('login', {token, name})

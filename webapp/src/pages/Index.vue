@@ -51,6 +51,9 @@
         </span>
       </q-bar>
     </div>
+    <div class="col full-width q-px-md q-pt-sm">
+      <canvas id="canvas" class="full-width bg-lime-1 shadow-1" style="height: 100%" />
+    </div>
     <div class="col full-width q-pa-md" style="overflow: auto">
       <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
@@ -185,6 +188,22 @@ export default defineComponent({
 
     onMounted(() => {
       if (!store.state.gameData.token) {
+        const canvas = document.getElementById('canvas') as HTMLCanvasElement
+        canvas.width = 1000
+        canvas.height = 1000
+        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+        ctx.lineWidth = 5
+        const drawfn = (instr: string) => {
+          const data = instr.split(' ')
+          if (data[0] === 'clear') {
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+          } else if (data[0] === 'line') {
+            ctx.beginPath()
+            ctx.moveTo(parseFloat(data[1]), parseFloat(data[2]))
+            ctx.lineTo(parseFloat(data[3]), parseFloat(data[4]))
+            ctx.stroke()
+          }
+        }
         let token = localStorage.getItem('token')
         let name = sessionStorage.getItem('name')
         if (!token) {
@@ -204,11 +223,11 @@ export default defineComponent({
           }).onOk(data => {
             name = String(data)
             sessionStorage.setItem('name', name)
-            void store.dispatch('gameData/connect', {token, name})
+            void store.dispatch('gameData/connect', {token, name, drawfn})
           })
         } else {
           console.log(token, name)
-          void store.dispatch('gameData/connect', {token, name})
+          void store.dispatch('gameData/connect', {token, name, drawfn})
         }
       }
     })
