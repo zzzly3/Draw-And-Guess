@@ -14,7 +14,7 @@
         </div>
       </q-bar>
     </div>
-    <div class="col-auto full-width text-center q-pa-sm" style="overflow: auto">
+    <div class="col-auto full-width text-center q-px-sm q-pt-sm" style="overflow: auto">
       <div class="q-pa-sm text-center q-gutter-sm">
         <q-chip v-for="p in players" :key="p.name"
                 :color="p.action ? 'accent' : (p.success ? 'positive' : '')"
@@ -28,7 +28,7 @@
         </q-chip>
       </div>
     </div>
-    <div class="col-auto q-ma-sm" style="overflow: auto" v-if="in_wait||((in_draw||in_select)&&painter===name)">
+    <div class="col-auto q-mx-sm q-mb-sm" style="overflow: auto" v-if="in_wait||((in_draw||in_select)&&painter===name)">
       <q-bar class="full-height full-width text-center bg-body">
         <span v-if="in_wait" class="text-center full-width">
           <q-btn color="positive" size="md" @click="start">开始游戏</q-btn>
@@ -54,12 +54,12 @@
         </span>
       </q-bar>
     </div>
-    <div class="col full-width q-px-md q-pt-sm">
-      <canvas id="canvas" class="full-width bg-lime-1 shadow-1" style="height: 100%" 
+    <div class="col full-width q-px-md">
+      <canvas id="canvas" class="full-width bg-lime-1 shadow-1" style="height: 100%"
               @mousedown="canvas_mouse_down" @mouseup="canvas_mouse_up" @mousemove.prevent="canvas_mouse_move"
               @touchstart="canvas_touch_start" @touchend="canvas_touch_end" @touchmove.prevent="canvas_touch_move" />
     </div>
-    <div class="col-3 full-width q-px-md q-pt-md" style="overflow: auto">
+    <div class="col-3 full-width q-px-md q-pt-sm" style="overflow: auto">
       <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
         <q-item :key="index" dense>
@@ -74,7 +74,7 @@
         </q-item>
       </q-virtual-scroll>
     </div>
-    <div class="col-1 full-width q-pl-lg q-pr-sm row" style="overflow: auto">
+    <div class="col-auto full-width q-pl-lg q-pr-sm q-py-sm row" style="overflow: auto">
       <div class="col self-center">
         <q-input outlined dense rounded v-model="send_text" bg-color="amber-1" @keypress.enter="send" :disable="painter===name">
           <template v-slot:after>
@@ -217,6 +217,7 @@ export default defineComponent({
     }
     const canvas_mouse_down = (event: MouseEvent) => {
       if (!canvas) return
+      if (!(in_wait.value || (in_draw.value && painter.value === name.value))) return
       const rect = canvas.getBoundingClientRect()
       const x = (event.clientX - rect.left) / rect.width * canvas.width
       const y = (event.clientY - rect.top) / rect.height * canvas.height
@@ -240,6 +241,7 @@ export default defineComponent({
     }
     const canvas_touch_start = (event: TouchEvent) => {
       if (!canvas) return
+      if (!(in_wait.value || (in_draw.value && painter.value === name.value))) return
       const rect = canvas.getBoundingClientRect()
       const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
       const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height

@@ -8,6 +8,10 @@ export class Whiteboard
         this.emitter = emitter
         this.actions = []
     }
+    clear() {
+        this.actions = []
+        this.emitter.emit(0, 'draw', {from: 0, type: 'clear', points: []})
+    }
     add_action(actor: number, action: {type: string, points: [number, number][]}) {
         if (action.type === 'clear') {
             this.actions = []

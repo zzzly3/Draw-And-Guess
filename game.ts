@@ -1,4 +1,5 @@
 import {Emitter} from './emitter';
+import { Whiteboard } from './whiteboard';
 import {get_puzzle_info, custom_puzzle, Puzzle, random_puzzles} from './puzzles';
 
 const selection_num = 6
@@ -132,10 +133,12 @@ export class DrawAndGuess
     private timer: NodeJS.Timeout|null
     private timer_time: number
     private puzzle: Puzzle
+    private readonly whiteboard: Whiteboard
 
-    constructor(emitter: Emitter) {
+    constructor(emitter: Emitter, whiteboard: Whiteboard) {
         this.players = new Map()
         this.emitter = emitter
+        this.whiteboard = whiteboard
         this.painter = null
         this.beginner = null
         this.success = new Set()
@@ -197,6 +200,7 @@ export class DrawAndGuess
         }
         player.set_online()
         this.update_all()
+        this.whiteboard.send_actions(player.token)
         return player
     }
 
@@ -264,6 +268,7 @@ export class DrawAndGuess
         } else {
             this.end()
         }
+        this.whiteboard.clear()
     }
 
     select(player: Player, id: number, custom: string) {

@@ -102,6 +102,11 @@ const gameData = {
       socket.on('connect', () => {
         socket.emit('login', {token, name})
         commit('connect')
+        commit('add_msg', {
+          author: '【温馨提示】',
+          content: '建议您在系统浏览器中打开本游戏，启用全屏模式体验更佳~',
+          notify: true
+        })
       })
       socket.on('disconnect', () => {
         commit('disconnect')
@@ -124,7 +129,7 @@ const gameData = {
         console.log('start')
         commit('add_msg', {
           author: '',
-          content: '不等了，咱几个先开一局！',
+          content: '咕咕咕，游戏开始！',
           notify: true
         })
       })

@@ -11,8 +11,8 @@ console.log(version)
 
 const io = new Server(3000)
 const emitter = new Emitter(io)
-const game = new DrawAndGuess(emitter)
 const whiteboard = new Whiteboard(emitter)
+const game = new DrawAndGuess(emitter, whiteboard)
 
 io.on("connection", socket => {
     socket.on('login', ({token, name}: {token: number, name: string}) => {
@@ -22,7 +22,6 @@ io.on("connection", socket => {
         emitter.join(token, socket)
         let player = new Player(token, name, emitter)
         player = game.join(player)
-        whiteboard.send_actions(player.token)
         socket.on('start', () => {
             game.start()
         })
