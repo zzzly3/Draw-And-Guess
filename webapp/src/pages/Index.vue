@@ -2,9 +2,10 @@
   <div class="fullscreen column content-start">
     <div class="col-1" style="overflow: auto">
       <q-bar class="full-height full-width bg-header row justify-center">
-        <q-img src="~assets/nnq.jpg" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
+        <q-img src="~assets/qiao.png" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
         <div class="text-center col-auto self-center" style="font-size: inherit">
-          <span>狮子山庄 - 你画我猜</span>
+          <span v-if="!in_draw||painter===name">常鸽 - 你画我猜</span>
+          <span v-if="in_draw&&painter!==name" class="text-weight-bold text-accent">（提示：{{hint}}）</span>
           <br/>
           <span v-if="!connected" class="text-negative">连接断开</span>
           <span v-if="connected && in_wait" class="text-primary">等待中</span>
@@ -13,7 +14,7 @@
         </div>
       </q-bar>
     </div>
-    <div class="col-auto full-width text-center q-pa-sm q-pt-md" style="overflow: auto">
+    <div class="col-auto full-width text-center q-pa-sm" style="overflow: auto">
       <div class="q-pa-sm text-center q-gutter-sm">
         <q-chip v-for="p in players" :key="p.name"
                 :color="p.action ? 'accent' : (p.success ? 'positive' : '')"
@@ -27,13 +28,15 @@
         </q-chip>
       </div>
     </div>
-    <div class="col-auto q-ma-sm" style="overflow: auto" v-if="in_wait||in_draw||(in_select&&painter===name)">
+    <div class="col-auto q-ma-sm" style="overflow: auto" v-if="in_wait||((in_draw||in_select)&&painter===name)">
       <q-bar class="full-height full-width text-center bg-body">
         <span v-if="in_wait" class="text-center full-width">
           <q-btn color="positive" size="md" @click="start">开始游戏</q-btn>
+          <q-btn color="primary" class="on-right" round icon="cleaning_services" @click="canvas_clear"></q-btn>
         </span>
-        <span v-if="in_draw" class="text-center full-width text-weight-bold text-accent">
+        <span v-if="in_draw&&painter===name" class="text-center full-width text-weight-bold text-accent">
           {{answer}}（提示：{{hint}}）
+          <q-btn color="primary" round icon="cleaning_services" @click="canvas_clear"></q-btn>
         </span>
         <span v-if="in_select&&painter===name" class="full-width row">
           <span class="col-auto self-center text-weight-bold text-accent q-px-sm">
@@ -52,9 +55,11 @@
       </q-bar>
     </div>
     <div class="col full-width q-px-md q-pt-sm">
-      <canvas id="canvas" class="full-width bg-lime-1 shadow-1" style="height: 100%" />
+      <canvas id="canvas" class="full-width bg-lime-1 shadow-1" style="height: 100%" 
+              @mousedown="canvas_mouse_down" @mouseup="canvas_mouse_up" @mousemove.prevent="canvas_mouse_move"
+              @touchstart="canvas_touch_start" @touchend="canvas_touch_end" @touchmove.prevent="canvas_touch_move" />
     </div>
-    <div class="col full-width q-pa-md" style="overflow: auto">
+    <div class="col-3 full-width q-px-md q-pt-md" style="overflow: auto">
       <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
         <q-item :key="index" dense>
@@ -185,23 +190,103 @@ export default defineComponent({
     const messages = computed(() => {
       return store.state.gameData.msg
     })
+    
+    let canvas = null as HTMLCanvasElement|null
+    let ctx = null as CanvasRenderingContext2D|null
+    let isDrawing = false
+    let pathDrawing = [] as [number, number][]
+    const start_paint = (x: number, y: number) => {
+      if (!ctx) return
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+      pathDrawing = [[x, y]]
+    }
+    const end_paint = () => {
+      if (!ctx) return
+      ctx.beginPath()
+      void store.dispatch('gameData/draw', {type: 'draw', points: pathDrawing})
+      pathDrawing = []
+    }
+    const in_paint = (x: number, y: number) => {
+      if (!ctx) return
+      ctx.lineTo(x, y)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+      pathDrawing.push([x, y])
+    }
+    const canvas_mouse_down = (event: MouseEvent) => {
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
+      const x = (event.clientX - rect.left) / rect.width * canvas.width
+      const y = (event.clientY - rect.top) / rect.height * canvas.height
+      isDrawing = true
+      start_paint(x, y)
+    }
+    const canvas_mouse_move = (event: MouseEvent) => {
+      if (isDrawing) {
+        if (!canvas) return
+        const rect = canvas.getBoundingClientRect()
+        const x = (event.clientX - rect.left) / rect.width * canvas.width
+        const y = (event.clientY - rect.top) / rect.height * canvas.height
+        in_paint(x, y)
+      }
+    }
+    const canvas_mouse_up = () => {
+      if (isDrawing) {
+        end_paint()
+        isDrawing = false
+      }
+    }
+    const canvas_touch_start = (event: TouchEvent) => {
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
+      const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
+      const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height
+      isDrawing = true
+      start_paint(x, y)
+    }
+    const canvas_touch_move = (event: TouchEvent) => {
+      if (isDrawing) {
+        if (!canvas) return
+        const rect = canvas.getBoundingClientRect()
+        const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
+        const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height
+        in_paint(x, y)
+      }
+    }
+    const canvas_touch_end = () => {
+      if (isDrawing) {
+        end_paint()
+        isDrawing = false
+      }
+    }
+    const canvas_clear = () => {
+      if (!canvas || !ctx) return
+      void store.dispatch('gameData/draw', {type: 'clear', points: []})
+      ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0)
+    }
 
     onMounted(() => {
       if (!store.state.gameData.token) {
-        const canvas = document.getElementById('canvas') as HTMLCanvasElement
+        canvas = document.getElementById('canvas') as HTMLCanvasElement
         canvas.width = 1000
         canvas.height = 1000
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        ctx.lineWidth = 5
-        const drawfn = (instr: string) => {
-          const data = instr.split(' ')
-          if (data[0] === 'clear') {
+        ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+        ctx.lineWidth = 8
+        const drawfn = (type: string, points: [number, number][]) => {
+          if (!ctx || !canvas) return
+          if (type === 'clear') {
             ctx.clearRect(0, 0, canvas.width, canvas.height)
-          } else if (data[0] === 'line') {
+            return
+          }
+          if (type === 'draw') {
             ctx.beginPath()
-            ctx.moveTo(parseFloat(data[1]), parseFloat(data[2]))
-            ctx.lineTo(parseFloat(data[3]), parseFloat(data[4]))
+            for (const p of points) {
+              ctx.lineTo(p[0], p[1])
+            }
             ctx.stroke()
+            return
           }
         }
         let token = localStorage.getItem('token')
@@ -241,7 +326,10 @@ export default defineComponent({
       in_wait, in_select, in_draw,
       chat, scroll_chat,
       start,
-      send_text, send
+      send_text, send,
+      canvas_clear,
+      canvas_mouse_down, canvas_mouse_move, canvas_mouse_up,
+      canvas_touch_start, canvas_touch_move, canvas_touch_end
     }
   }
 })

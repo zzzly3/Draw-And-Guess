@@ -90,7 +90,7 @@ const gameData = {
   } as MutationTree<GameData>,
 
   actions: {
-    connect({state, commit}, {token, name, drawfn}: {token: number, name: string, drawfn: (cmd: string) => void}) {
+    connect({state, commit}, {token, name, drawfn}: {token: number, name: string, drawfn: (type: string, points: [number, number][]) => void}) {
       if (state.connect)
         return
       commit('init', {token, name})
@@ -98,7 +98,6 @@ const gameData = {
         socket.connect()
         return
       }
-      drawfn('line 0 0 1000 1000')
       socket = io()
       socket.on('connect', () => {
         socket.emit('login', {token, name})
@@ -210,6 +209,12 @@ const gameData = {
           notify: true
         })
       })
+      socket.on('draw', (data: {from: number, type: string, points: [number, number][]}) => {
+        // console.log(data)
+        if (data.from === state.token)
+          return
+        drawfn(data.type, data.points)
+      })
     },
     start() {
       socket?.volatile.emit('start')
@@ -222,6 +227,9 @@ const gameData = {
     },
     command({}, cmd: string) {
       socket?.volatile.emit('command', cmd)
+    },
+    draw({}, data: {type: string, points: [number, number][]}) {
+      socket?.volatile.emit('draw', data)
     }
   } as ActionTree<GameData, StateInterface>
 } as Module<GameData, StateInterface>

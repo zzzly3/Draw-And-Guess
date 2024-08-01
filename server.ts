@@ -2,6 +2,7 @@ import {Server} from "socket.io";
 import {Emitter} from './emitter';
 import {DrawAndGuess, Player} from './game';
 import {statSync} from 'fs';
+import { Whiteboard } from "./whiteboard";
 
 const game_ver = statSync('./game.ts').mtime.toLocaleString()
 const puzzle_ver = statSync('./puzzles.txt').mtime.toLocaleString()
@@ -11,6 +12,7 @@ console.log(version)
 const io = new Server(3000)
 const emitter = new Emitter(io)
 const game = new DrawAndGuess(emitter)
+const whiteboard = new Whiteboard(emitter)
 
 io.on("connection", socket => {
     socket.on('login', ({token, name}: {token: number, name: string}) => {
@@ -20,6 +22,7 @@ io.on("connection", socket => {
         emitter.join(token, socket)
         let player = new Player(token, name, emitter)
         player = game.join(player)
+        whiteboard.send_actions(player.token)
         socket.on('start', () => {
             game.start()
         })
@@ -31,6 +34,9 @@ io.on("connection", socket => {
         socket.on('answer', (msg: string) => {
             msg = String(msg)
             game.answer(player, msg)
+        })
+        socket.on('draw', (data: {type: string, points: [number, number][]}) => {
+            whiteboard.add_action(player.token, {type: data.type, points: data.points})
         })
         socket.on('disconnect', () => {
             if (emitter.validate(player.token, socket)) {
