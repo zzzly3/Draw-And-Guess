@@ -62,7 +62,7 @@
     <div class="col-3 full-width q-px-md q-pt-sm" style="overflow: auto">
       <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
-        <q-item :key="index" dense>
+        <q-item :key="index" dense class="text-caption" style="min-height:18px;" >
           <q-item-section>
             <q-item-label v-if="item.notify" class="text-primary">
               {{item.author}}{{item.content}}
