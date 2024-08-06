@@ -41,6 +41,7 @@ export interface GameData {
 
 let rank: {score: number, name: string}[] = []
 let socket: ReturnType<typeof io>
+let first_connect = true
 
 const gameData = {
   namespaced: true,
@@ -102,11 +103,14 @@ const gameData = {
       socket.on('connect', () => {
         socket.emit('login', {token, name})
         commit('connect')
-        commit('add_msg', {
-          author: '【温馨提示】',
-          content: '建议您在系统浏览器中打开本游戏，启用全屏模式体验更佳~',
-          notify: true
-        })
+        if (first_connect) {
+          commit('add_msg', {
+            author: '【温馨提示】',
+            content: '建议您在系统浏览器中打开本游戏，启用全屏模式体验更佳~',
+            notify: true
+          })
+          first_connect = false
+        }
       })
       socket.on('disconnect', () => {
         commit('disconnect')

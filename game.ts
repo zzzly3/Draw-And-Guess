@@ -190,8 +190,10 @@ export class DrawAndGuess
     join(player: Player) {
         if (this.players.has(player.token)) {
             const p = this.players.get(player.token)
-            if (p)
+            if (p) {
+                p.name = player.name
                 player = p
+            }
         } else {
             let fp = this.players.values().next()
             if (!fp.done)

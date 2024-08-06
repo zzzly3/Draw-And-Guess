@@ -32,11 +32,13 @@
       <q-bar class="full-height full-width text-center bg-body">
         <span v-if="in_wait" class="text-center full-width">
           <q-btn color="positive" size="md" @click="start">开始游戏</q-btn>
+          <PopupColorPicker class="on-right" v-model="painterColor" />
           <q-btn color="primary" class="on-right" round icon="cleaning_services" @click="canvas_clear"></q-btn>
         </span>
         <span v-if="in_draw&&painter===name" class="text-center full-width text-weight-bold text-accent">
           {{answer}}（提示：{{hint}}）
-          <q-btn color="primary" round icon="cleaning_services" @click="canvas_clear"></q-btn>
+          <PopupColorPicker v-model="painterColor" />
+          <q-btn color="primary" class="on-right" round icon="cleaning_services" @click="canvas_clear"></q-btn>
         </span>
         <span v-if="in_select&&painter===name" class="full-width row">
           <span class="col-auto self-center text-weight-bold text-accent q-px-sm">
@@ -91,9 +93,13 @@
 import {computed, defineComponent, nextTick, onMounted, Ref, ref, watch} from 'vue';
 import {useStore} from 'src/store';
 import {QVirtualScroll, useQuasar} from 'quasar';
+import PopupColorPicker from 'src/components/PopupColorPicker.vue';
 
 export default defineComponent({
   name: 'IndexPage',
+  components: {
+    PopupColorPicker
+  },
   setup() {
     const store = useStore()
     const $q = useQuasar()
@@ -195,6 +201,12 @@ export default defineComponent({
     let ctx = null as CanvasRenderingContext2D|null
     let isDrawing = false
     let pathDrawing = [] as [number, number][]
+    let painterColor = ref('#000000')
+    watch(painterColor, () => {
+      if (ctx) {
+        ctx.strokeStyle = painterColor.value
+      }
+    })
     const start_paint = (x: number, y: number) => {
       if (!ctx) return
       ctx.beginPath()
@@ -204,7 +216,7 @@ export default defineComponent({
     const end_paint = () => {
       if (!ctx) return
       ctx.beginPath()
-      void store.dispatch('gameData/draw', {type: 'draw', points: pathDrawing})
+      void store.dispatch('gameData/draw', {type: painterColor.value, points: pathDrawing})
       pathDrawing = []
     }
     const in_paint = (x: number, y: number) => {
@@ -282,14 +294,13 @@ export default defineComponent({
             ctx.clearRect(0, 0, canvas.width, canvas.height)
             return
           }
-          if (type === 'draw') {
-            ctx.beginPath()
-            for (const p of points) {
-              ctx.lineTo(p[0], p[1])
-            }
-            ctx.stroke()
-            return
+          ctx.strokeStyle = type
+          ctx.beginPath()
+          for (const p of points) {
+            ctx.lineTo(p[0], p[1])
           }
+          ctx.stroke()
+          ctx.strokeStyle = painterColor.value
         }
         let token = localStorage.getItem('token')
         let name = sessionStorage.getItem('name')
@@ -320,6 +331,7 @@ export default defineComponent({
     })
 
     return {
+      painterColor,
       connected,
       name, credit,
       selections, select, custom_select,

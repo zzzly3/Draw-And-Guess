@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "run-server": "ts-node server.ts",
-    "run-dev": "cd webapp && quasar dev",
+    "server": "ts-node server.ts",
+    "dev": "cd webapp && quasar dev",
     "build": "cd webapp && quasar build"
   },
   "keywords": [],
