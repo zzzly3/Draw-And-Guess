@@ -15,6 +15,19 @@ const whiteboard = new Whiteboard(emitter)
 const game = new DrawAndGuess(emitter, whiteboard)
 
 io.on("connection", socket => {
+    socket.on('guest-login', () => {
+        const token = ((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000)
+        console.log('(connect)', token, 'guest')
+        emitter.join(token, socket)
+        emitter.set_guest(token)
+        game.update_all()
+        whiteboard.send_actions(token)
+        socket.on('disconnect', () => {
+            if (emitter.validate(token, socket)) {
+                emitter.leave(token)
+            }
+        })
+    })
     socket.on('login', ({token, name}: {token: number, name: string}) => {
         console.log('(connect)', token, name)
         if (!token || !name)

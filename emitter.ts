@@ -1,5 +1,9 @@
 import {Server, Socket} from 'socket.io';
 
+export const EMIT_TO_ALL = 0
+export const EMIT_TO_PLAYER = -1
+export const EMIT_TO_GUEST = -2
+
 export class Emitter
 {
     private io: Server
@@ -20,6 +24,10 @@ export class Emitter
         socket.join('main')
     }
 
+    set_guest(token: number) {
+        this.sockets.get(token)?.join('guest')
+    }
+
     leave(token: number) {
         if (this.sockets.has(token)) {
             this.sockets.get(token)?.disconnect(true)
@@ -33,10 +41,20 @@ export class Emitter
 
     send() {
         for (let msg of this.messages) {
-            if (msg.to) {
+            if (msg.to > 0) {
                 this.sockets.get(msg.to)?.emit(msg.type, msg.data)
             } else {
-                this.io.to('main').emit(msg.type, msg.data)
+                switch (msg.to) {
+                    case EMIT_TO_ALL:
+                        this.io.to('main').emit(msg.type, msg.data)
+                        break
+                    case EMIT_TO_PLAYER:
+                        this.io.to('main').except('guest').emit(msg.type, msg.data)
+                        break
+                    case EMIT_TO_GUEST:
+                        this.io.to('guest').emit(msg.type, msg.data)
+                        break
+                }
             }
         }
         this.messages = []

@@ -33,6 +33,7 @@ interface MsgInfo {
 export interface GameData {
   token: number,
   name: string,
+  guest: boolean,
   connect: boolean,
   info: GameInfo,
   msg: MsgInfo[],
@@ -49,6 +50,7 @@ const gameData = {
     return {
       token: 0,
       name: '',
+      guest: false,
       connect: false,
       info: {
         state: {
@@ -82,6 +84,10 @@ const gameData = {
       state.token = token
       state.name = name
     },
+    set_guest(state, guest: boolean) {
+      state.guest = guest
+      state.name = ''
+    },
     add_msg(state, msg: MsgInfo) {
       state.msg.push(msg)
     },
@@ -95,13 +101,18 @@ const gameData = {
       if (state.connect)
         return
       commit('init', {token, name})
+      if (name.toLocaleLowerCase() === 'guest')
+        commit('set_guest', true)
       if (socket) {
         socket.connect()
         return
       }
       socket = io()
       socket.on('connect', () => {
-        socket.emit('login', {token, name})
+        if (state.guest)
+          socket.emit('guest-login')
+        else
+          socket.emit('login', {token, name})
         commit('connect')
         if (first_connect) {
           commit('add_msg', {

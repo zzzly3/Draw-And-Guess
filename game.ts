@@ -1,4 +1,4 @@
-import {Emitter} from './emitter';
+import {Emitter, EMIT_TO_ALL, EMIT_TO_GUEST, EMIT_TO_PLAYER} from './emitter';
 import { Whiteboard } from './whiteboard';
 import {get_puzzle_info, custom_puzzle, Puzzle, random_puzzles} from './puzzles';
 
@@ -38,7 +38,7 @@ export class Player
     }
 
     chat(msg: string) {
-        this.emitter.emit(0, 'chat', {name: this.name, msg})
+        this.emitter.emit(EMIT_TO_ALL, 'chat', {name: this.name, msg})
     }
 
     notify(msg: string) {
@@ -67,12 +67,12 @@ export class Player
 
     set_online() {
         this.online = true
-        this.emitter.emit(0, 'join', {name: this.name})
+        this.emitter.emit(EMIT_TO_ALL, 'join', {name: this.name})
     }
 
     set_offline() {
         this.online = false
-        this.emitter.emit(0, 'leave', {name: this.name})
+        this.emitter.emit(EMIT_TO_ALL, 'leave', {name: this.name})
     }
 
     get_online() {
@@ -81,7 +81,7 @@ export class Player
 
     add_point(pt: number) {
         this.point += pt
-        this.emitter.emit(0, 'gain-point', {name: this.name, point: pt})
+        this.emitter.emit(EMIT_TO_ALL, 'gain-point', {name: this.name, point: pt})
     }
 
     get_point() {
@@ -149,7 +149,7 @@ export class DrawAndGuess
     }
 
     emit(type: string, data?: any) {
-        this.emitter.emit(0, type, data)
+        this.emitter.emit(EMIT_TO_ALL, type, data)
     }
 
     update_all() {
@@ -181,6 +181,9 @@ export class DrawAndGuess
             data.state.credit = player.get_credit()
             player.emit('update-all', data)
         })
+        data.state.answer = ''
+        data.state.credit = 0
+        this.emitter.emit(EMIT_TO_GUEST, 'update-all', data)
     }
 
     validate(player: Player) {

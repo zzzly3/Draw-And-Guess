@@ -28,7 +28,7 @@
         </q-chip>
       </div>
     </div>
-    <div class="col-auto q-mx-sm q-mb-sm" style="overflow: auto" v-if="in_wait||((in_draw||in_select)&&painter===name)">
+    <div class="col-auto q-mx-sm q-mb-sm" style="overflow: auto" v-if="!guest&&(in_wait||((in_draw||in_select)&&painter===name))">
       <q-bar class="full-height full-width text-center bg-body">
         <span v-if="in_wait" class="text-center full-width">
           <q-btn color="positive" size="md" @click="start">开始游戏</q-btn>
@@ -78,9 +78,9 @@
     </div>
     <div class="col-auto full-width q-pl-lg q-pr-sm q-py-sm row" style="overflow: auto">
       <div class="col self-center">
-        <q-input outlined dense rounded v-model="send_text" bg-color="amber-1" @keypress.enter="send" :disable="painter===name">
+        <q-input outlined dense rounded v-model="send_text" bg-color="amber-1" @keypress.enter="send" :disable="guest||painter===name">
           <template v-slot:after>
-            <q-btn round dense flat icon="send" color="primary" size="lg" @click="send" :disable="painter===name" />
+            <q-btn round dense flat icon="send" color="primary" size="lg" @click="send" :disable="guest||painter===name" />
           </template>
         </q-input>
       </div>
@@ -144,6 +144,9 @@ export default defineComponent({
     })
     const name = computed(() => {
       return store.state.gameData.name
+    })
+    const guest = computed(() => {
+      return store.state.gameData.guest
     })
     const credit = computed(() => {
       return store.state.gameData.info.state.credit
@@ -229,7 +232,7 @@ export default defineComponent({
     }
     const canvas_mouse_down = (event: MouseEvent) => {
       if (!canvas) return
-      if (!(in_wait.value || (in_draw.value && painter.value === name.value))) return
+      if (guest.value || !(in_wait.value || (in_draw.value && painter.value === name.value))) return
       const rect = canvas.getBoundingClientRect()
       const x = (event.clientX - rect.left) / rect.width * canvas.width
       const y = (event.clientY - rect.top) / rect.height * canvas.height
@@ -253,7 +256,7 @@ export default defineComponent({
     }
     const canvas_touch_start = (event: TouchEvent) => {
       if (!canvas) return
-      if (!(in_wait.value || (in_draw.value && painter.value === name.value))) return
+      if (guest.value || !(in_wait.value || (in_draw.value && painter.value === name.value))) return
       const rect = canvas.getBoundingClientRect()
       const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
       const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height
@@ -302,16 +305,16 @@ export default defineComponent({
           ctx.stroke()
           ctx.strokeStyle = painterColor.value
         }
-        let token = localStorage.getItem('token')
+        let token = Number(localStorage.getItem('token'))
         let name = sessionStorage.getItem('name')
         if (!token) {
-          token = String(((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000))
-          localStorage.setItem('token', token)
+          token = ((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000)
+          localStorage.setItem('token', String(token))
         }
         if (!name) {
           $q.dialog({
             title: '登录',
-            message: '输入一个昵称（不少于3个字）',
+            message: '输入一个昵称（不少于3个字）\n输入guest进入旁观模式',
             prompt: {
               model: '',
               isValid: val => val.length > 2,
@@ -332,7 +335,7 @@ export default defineComponent({
 
     return {
       painterColor,
-      connected,
+      connected, guest,
       name, credit,
       selections, select, custom_select,
       painter, players, messages,
