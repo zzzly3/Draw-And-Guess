@@ -314,7 +314,7 @@ export default defineComponent({
         if (!name) {
           $q.dialog({
             title: '登录',
-            message: '输入一个昵称（不少于3个字）\n输入guest进入旁观模式',
+            message: '输入一个昵称（不少于3个字）或输入guest进入旁观模式',
             prompt: {
               model: '',
               isValid: val => val.length > 2,
