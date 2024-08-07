@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "import-puzzle": "ts-node puzzle_script.ts",
     "server": "ts-node server.ts",
     "dev": "cd webapp && quasar dev",
     "build": "cd webapp && quasar build"

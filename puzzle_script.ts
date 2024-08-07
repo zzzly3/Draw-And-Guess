@@ -1,8 +1,17 @@
-import {add_puzzle, sync_puzzle} from "./puzzles";
-import {readFileSync} from 'fs'
+import * as fs from 'fs';
+import {sync_puzzle, add_puzzle} from './puzzles';
 
-const data = readFileSync('plain.txt').toString().split('\n')
-for (const i of data) {
-    add_puzzle({word: i, hint: '常用软件'})
+const data = fs.readFileSync('plain.txt')
+const lines = data.toString().split('\n')
+let hint = ''
+for (let line of lines) {
+    if (hint === '') {
+        hint = line.trim()
+    } else if (line.trim() === '') {
+        hint = ''
+    } else {
+        add_puzzle({word: line.trim(), hint})
+    }
 }
+
 sync_puzzle()
