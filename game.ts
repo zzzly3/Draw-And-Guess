@@ -298,7 +298,7 @@ export class DrawAndGuess
         if (!this.validate(player) || this.painter === player || !msg)
             return
         if (this.state === GameState.Draw) {
-            if (msg.toLowerCase() === this.puzzle.word.toLowerCase()) {
+            if (msg.trim().toLowerCase() === this.puzzle.word.toLowerCase()) {
                 player.emit('bingo')
                 if (!this.success.has(player.token)) {
                     this.success.add(player.token)
