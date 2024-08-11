@@ -45,7 +45,7 @@
             请选词
           </span>
           <span class="col self-center q-px-sm q-gutter-md">
-            <q-btn v-for="word in selections" :key="word" @click="select(word.id)"
+            <q-btn v-for="word in selections" :key="word.id" @click="select(word.id)"
                    size="md" color="primary" outline>
               {{word.word}}
             </q-btn>
