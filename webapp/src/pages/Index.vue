@@ -214,10 +214,13 @@ export default defineComponent({
       if (!ctx) return
       ctx.beginPath()
       ctx.moveTo(x, y)
+      ctx.arc(x, y, ctx.lineWidth / 10, 0, 2 * Math.PI)
+      ctx.fill()
       pathDrawing = [[x, y]]
     }
     const end_paint = () => {
       if (!ctx) return
+      ctx.stroke()
       ctx.beginPath()
       void store.dispatch('gameData/draw', {type: painterColor.value, points: pathDrawing})
       pathDrawing = []
@@ -299,6 +302,8 @@ export default defineComponent({
           }
           ctx.strokeStyle = type
           ctx.beginPath()
+          ctx.arc(points[0][0], points[0][1], ctx.lineWidth / 10, 0, 2 * Math.PI)
+          ctx.fill()
           for (const p of points) {
             ctx.lineTo(p[0], p[1])
           }
