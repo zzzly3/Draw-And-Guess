@@ -181,7 +181,7 @@ export class DrawAndGuess
             data.state.credit = player.get_credit()
             player.emit('update-all', data)
         })
-        data.state.answer = ''
+        data.state.answer = this.puzzle.word
         data.state.credit = 0
         this.emitter.emit(EMIT_TO_GUEST, 'update-all', data)
     }

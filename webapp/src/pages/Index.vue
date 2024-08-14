@@ -4,8 +4,8 @@
       <q-bar class="full-height full-width bg-header row justify-center">
         <q-img src="~assets/qiao.png" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
         <div class="text-center col-auto self-center" style="font-size: inherit">
-          <span v-if="!in_draw||painter===name">常鸽 - 你想我拆</span>
-          <span v-if="in_draw&&painter!==name" class="text-weight-bold text-accent">（提示：{{hint}}）</span>
+          <span v-if="in_draw&&painter!==name" class="text-weight-bold text-accent">{{guest?answer:''}}（提示：{{hint}}）</span>
+          <span v-else>常鸽 - 你想我拆</span>
           <br/>
           <span v-if="!connected" class="text-negative">连接断开</span>
           <span v-if="connected && in_wait" class="text-primary">等待中</span>
