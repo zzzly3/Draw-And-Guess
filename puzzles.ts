@@ -15,11 +15,33 @@ for (let line of lines) {
         puzzles.push({word: a[0], hint: a[1]})
 }
 
+export function format_variants(word: string) {
+    word = word.trim().toUpperCase()
+    word = word.replace('0', '零')
+    word = word.replace('1', '一')
+    word = word.replace('2', '二')
+    word = word.replace('3', '三')
+    word = word.replace('4', '四')
+    word = word.replace('5', '五')
+    word = word.replace('6', '六')
+    word = word.replace('7', '七')
+    word = word.replace('8', '八')
+    word = word.replace('9', '九')
+    word = word.replace(',', '，')
+    word = word.replace('.', '。')
+    word = word.replace('?', '？')
+    word = word.replace('!', '！')
+    word = word.replace(';', '；')
+    word = word.replace(':', '：')
+    return word
+}
+
 export function get_puzzle_info(id: number) {
     return id >= 0 && id < puzzles.length ? puzzles[id] : null
 }
 
 export function custom_puzzle(word: string) {
+    word = word.trim()
     return word.length > 0 && word.length < 10 ? {word, hint: '<自定义>'} : null
 }
 

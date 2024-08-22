@@ -1,6 +1,6 @@
 import {Emitter, EMIT_TO_ALL, EMIT_TO_GUEST, EMIT_TO_PLAYER} from './emitter';
 import { Whiteboard } from './whiteboard';
-import {get_puzzle_info, custom_puzzle, Puzzle, random_puzzles} from './puzzles';
+import {get_puzzle_info, custom_puzzle, Puzzle, random_puzzles, format_variants} from './puzzles';
 
 const selection_num = 6
 const select_timeout = 40
@@ -298,7 +298,7 @@ export class DrawAndGuess
         if (!this.validate(player) || this.painter === player || !msg)
             return
         if (this.state === GameState.Draw) {
-            if (msg.trim().toLowerCase() === this.puzzle.word.toLowerCase()) {
+            if (format_variants(msg) === format_variants(this.puzzle.word)) {
                 player.emit('bingo')
                 if (!this.success.has(player.token)) {
                     this.success.add(player.token)
