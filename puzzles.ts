@@ -5,15 +5,20 @@ export interface Puzzle {
     hint: string
 }
 
-const puzzles: Puzzle[] = []
+let puzzles: Puzzle[] = []
 
-const data = fs.readFileSync('puzzles.txt')
-const lines = data.toString().split('\n')
-for (let line of lines) {
-    const a = line.split(',')
-    if (a.length === 2)
-        puzzles.push({word: a[0], hint: a[1]})
+export function reload_puzzles() {
+    puzzles = []
+    const data = fs.readFileSync('puzzles.txt')
+    const lines = data.toString().split('\n')
+    for (let line of lines) {
+        const a = line.split(',')
+        if (a.length === 2)
+            puzzles.push({word: a[0], hint: a[1]})
+    }
 }
+
+reload_puzzles()
 
 export function format_variants(word: string) {
     word = word.trim().toUpperCase()

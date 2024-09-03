@@ -3,10 +3,15 @@ import {Emitter} from './emitter';
 import {DrawAndGuess, Player} from './game';
 import {statSync} from 'fs';
 import { Whiteboard } from "./whiteboard";
+import { reload_puzzles } from "./puzzles";
 
-const game_ver = statSync('./game.ts').mtime.toLocaleString()
-const puzzle_ver = statSync('./puzzles.txt').mtime.toLocaleString()
-const version = `Draw And Guess\nby zzzly3<z@tanre.cn>\nGame version: ${game_ver}\nPuzzle version: ${puzzle_ver}`
+function get_version() {
+    const game_ver = statSync('./game.ts').mtime.toLocaleString()
+    const puzzle_ver = statSync('./puzzles.txt').mtime.toLocaleString()
+    return `Draw And Guess\nby zzzly3<z@tanre.cn>\nGame version: ${game_ver}\nPuzzle version: ${puzzle_ver}`
+}
+
+let version = get_version()
 console.log(version)
 
 const io = new Server(3000)
@@ -69,6 +74,11 @@ io.on("connection", socket => {
                 case 'give-credit':
                     if (Number(cmd[1]) > 0)
                         player.give_credit(Number(cmd[1]))
+                    break
+                case 'reload-puzzles':
+                    reload_puzzles()
+                    version = get_version()
+                    player.notify(version)
                     break
             }
         })
