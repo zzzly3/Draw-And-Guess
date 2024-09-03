@@ -37,6 +37,9 @@ io.on("connection", socket => {
         console.log('(connect)', token, name)
         if (!token || !name)
             return
+        name = name.trim()
+        if (name.length < 2 || name.length > 9)
+            return
         emitter.join(token, socket)
         let player = new Player(token, name, emitter)
         player = game.join(player)

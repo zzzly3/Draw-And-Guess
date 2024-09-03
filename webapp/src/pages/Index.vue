@@ -164,12 +164,12 @@ export default defineComponent({
         message: '输入一个词语（不超过9个字）',
         prompt: {
           model: '',
-          isValid: val => val.length > 0 && val.length < 10,
+          isValid: val => val.trim().length > 0 && val.trim().length < 10,
           type: 'text'
         },
         cancel: true
       }).onOk(data => {
-        void store.dispatch('gameData/select', {id: -1, custom: String(data)})
+        void store.dispatch('gameData/select', {id: -1, custom: String(data).trim()})
       })
     }
 
@@ -319,15 +319,15 @@ export default defineComponent({
         if (!name) {
           $q.dialog({
             title: '登录',
-            message: '输入一个昵称（不少于3个字）或输入guest进入旁观模式',
+            message: '输入一个昵称（2-9个字）或输入guest进入旁观模式',
             prompt: {
               model: '',
-              isValid: val => val.length > 2,
+              isValid: val => val.trim().length >= 2 && val.trim().length <= 9,
               type: 'text'
             },
             persistent: true
           }).onOk(data => {
-            name = String(data)
+            name = String(data).trim()
             sessionStorage.setItem('name', name)
             void store.dispatch('gameData/connect', {token, name, drawfn})
           })
