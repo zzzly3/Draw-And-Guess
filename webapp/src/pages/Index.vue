@@ -2,7 +2,7 @@
   <div class="fullscreen column content-start">
     <div class="col-1" style="overflow: auto">
       <q-bar class="full-height full-width bg-header row justify-center">
-        <q-img src="~assets/qiao2.png" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
+        <q-img src="~assets/qiao2.jpg" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
         <div class="text-center col-auto self-center" style="font-size: inherit">
           <span v-if="in_draw&&painter!==name" class="text-weight-bold text-accent">{{guest?answer:''}}（提示：{{hint}}）</span>
           <span v-else>常鸽 - 你想我拆</span>
