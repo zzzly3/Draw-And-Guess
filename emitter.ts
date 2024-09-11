@@ -65,6 +65,9 @@ export class Emitter
             data = JSON.parse(JSON.stringify(data))
         if (['start', 'end', 'join', 'leave', 'chat', 'gain-point', 'selections', 'gain-credit'].indexOf(type) > -1)
             console.log(type, data)
+        if (type === 'update-all') { // remove old update-all
+            this.messages = this.messages.filter(msg => msg.type !== 'update-all' || msg.to !== to)
+        }
         this.messages.push({to, type, data})
     }
 }

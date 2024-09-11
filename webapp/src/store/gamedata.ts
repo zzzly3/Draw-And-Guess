@@ -5,6 +5,26 @@ import {Dialog} from 'quasar';
 import RankDialog from 'src/components/RankDialog.vue';
 import AnswerDialog from 'src/components/AnswerDialog.vue';
 
+const icon_list: string[] = ['person', 'groups', 'account_circle', 'face', 'group', 'badge', 'engineering', 'account_box',
+  'assignment_ind', 'psychology', 'emoji_emotions', 'sentiment_very_satisfied', 'sentiment_satisfied_alt', 'accessibility',
+  'directions_run', 'accessibility_new', 'sentiment_dissatisfied', 'directions_walk', 'sentiment_very_dissatisfied',
+  'emoji_people', 'self_improvement', 'mood', 'directions_bike', 'accessible', 'hotel', 'mood_bad', 'pool', 'diversity_3',
+  '3p', 'hail', 'accessible_forward', 'sports_kabaddi', 'escalator_warning', 'bathtub', 'sick', 'rowing', 'nature_people',
+  'elderly', 'diversity_1', 'personal_injury', 'attribution', 'surfing', 'sports_handball', 'run_circle', 'airline_seat_recline_normal',
+  'diversity_2', 'kayaking', 'remember_me', 'downhill_skiing', 'skateboarding', 'boy', 'hot_tub', 'sports_martial_arts',
+  'nordic_walking', 'girl', 'airline_seat_recline_extra', 'face_6', 'snowboarding', 'local_hotel', 'elderly_woman',
+  'person_2', 'sledding', 'face_2', 'face_4', 'airline_seat_individual_suite', 'face_5', 'person_4', 'person_3', 'assist_walker']
+
+export interface Player {
+  name: string,
+  point: number,
+  icon: string,
+  online: boolean,
+  action: boolean,
+  success: boolean,
+  local_bg_color: string
+}
+
 interface GameInfo {
   state: {
     wait: boolean,
@@ -15,16 +35,10 @@ interface GameInfo {
     credit: number,
     timeout: number
   },
-  players: {
-      name: string,
-      point: number,
-      online: boolean,
-      action: boolean,
-      success: boolean
-  }[]
+  players: Player[]
 }
 
-interface MsgInfo {
+export interface MsgInfo {
   author: string,
   content: string,
   notify: boolean
@@ -80,6 +94,20 @@ const gameData = {
       console.log(info)
       state.info = info
     },
+    update_icon_by_name(state, {name, icon}: {name: string, icon: string}) {
+      for (const player of state.info.players) {
+        if (player.name === name) {
+          player.icon = icon
+        }
+      }
+    },
+    update_local_bg_color(state, {name, color}: {name: string, color: string}) {
+      for (const player of state.info.players) {
+        if (player.name === name) {
+          player.local_bg_color = color
+        }
+      }
+    },
     init(state, {token, name}: {token: number, name: string}) {
       state.token = token
       state.name = name
@@ -97,7 +125,7 @@ const gameData = {
   } as MutationTree<GameData>,
 
   actions: {
-    connect({state, commit}, {token, name, drawfn}: {token: number, name: string, drawfn: (type: string, points: [number, number][]) => void}) {
+    connect({state, commit, dispatch}, {token, name, drawfn}: {token: number, name: string, drawfn: (type: string, points: [number, number][]) => void}) {
       if (state.connect)
         return
       commit('init', {token, name})
@@ -130,6 +158,11 @@ const gameData = {
         commit('updateAll', data)
         console.log(data)
       })
+      socket.on('update-icon', (data: {name: string, icon: string}) => {
+        commit('update_icon_by_name', data)
+        if (data.name !== name)
+          void dispatch('localHighlight', {name: data.name})
+      }),
       socket.on('chat', (data: {name: string|null, msg: string}) => {
         commit('add_msg', {
           author: data.name ? String(data.name) : '',
@@ -250,6 +283,20 @@ const gameData = {
     },
     draw({}, data: {type: string, points: [number, number][]}) {
       socket?.volatile.emit('draw', data)
+    },
+    randomIcon() {
+      const icon = icon_list[Math.floor(Math.random() * icon_list.length)]
+      socket?.volatile.emit('seticon', icon)
+    },
+    localHighlight({commit, dispatch}, {name, color='orange', depth=5}: {name: string, color?: string, depth?: number}) {
+      if (depth === 1) {
+        commit('update_local_bg_color', {name, color: ''})
+        return
+      }
+      commit('update_local_bg_color', {name, color: color + '-' + String(depth)})
+      setTimeout(() => {
+        void dispatch('localHighlight', {name, color, depth: depth - 1})
+      }, 60)
     }
   } as ActionTree<GameData, StateInterface>
 } as Module<GameData, StateInterface>

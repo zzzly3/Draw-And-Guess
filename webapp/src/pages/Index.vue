@@ -16,10 +16,10 @@
     </div>
     <div class="col-auto full-width text-center q-px-sm q-pt-sm" style="overflow: auto">
       <div class="q-pa-sm text-center q-gutter-sm">
-        <q-chip v-for="p in players" :key="p.name"
-                :color="p.action ? 'accent' : (p.success ? 'positive' : '')"
+        <q-chip v-for="p in players" :key="p.name" clickable @click="click_user(p)" v-ripple
+                :color="p.action ? 'accent' : (p.success ? 'positive' : p.local_bg_color)"
                 :text-color="p.action ? 'white' : (p.success ? 'white' : '')"
-                :icon="p.action ? 'brush' : (p.success ? 'check' : 'girl')">
+                :icon="p.action ? 'brush' : (p.success ? 'check' : p.icon)">
           {{p.name}}
           <q-badge :color="p.name === name ? 'primary' : (p.online ? 'secondary' : 'negative')"
                    floating transparent>
@@ -94,6 +94,7 @@ import {computed, defineComponent, nextTick, onMounted, Ref, ref, watch} from 'v
 import {useStore} from 'src/store';
 import {QVirtualScroll, useQuasar} from 'quasar';
 import PopupColorPicker from 'src/components/PopupColorPicker.vue';
+import { Player } from 'src/store/gamedata';
 
 export default defineComponent({
   name: 'IndexPage',
@@ -175,6 +176,12 @@ export default defineComponent({
 
     const start = () => {
       void store.dispatch('gameData/start')
+    }
+
+    const click_user = (p: Player) => {
+      // console.log(p)
+      if (p.name === name.value && !p.action && !p.success)
+        void store.dispatch('gameData/randomIcon')
     }
 
     const send_text = ref('')
@@ -347,7 +354,7 @@ export default defineComponent({
       count_down, hint, answer,
       in_wait, in_select, in_draw,
       chat, scroll_chat,
-      start,
+      start, click_user,
       send_text, send,
       canvas_clear,
       canvas_mouse_down, canvas_mouse_move, canvas_mouse_up,

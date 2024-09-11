@@ -55,6 +55,9 @@ io.on("connection", socket => {
             msg = String(msg)
             game.answer(player, msg)
         })
+        socket.on('seticon', (icon: string) => {
+            player.update_icon(String(icon))
+        })
         socket.on('draw', (data: {type: string, points: [number, number][]}) => {
             whiteboard.add_action(player.token, {type: data.type, points: data.points})
         })

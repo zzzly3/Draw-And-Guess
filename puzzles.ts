@@ -9,13 +9,20 @@ let puzzles: Puzzle[] = []
 
 export function reload_puzzles() {
     puzzles = []
+    const hints_count: {[key: string]: number} = {}
     const data = fs.readFileSync('puzzles.txt')
     const lines = data.toString().split('\n')
     for (let line of lines) {
-        const a = line.split(',')
-        if (a.length === 2)
+        const a = line.trim().split(',')
+        if (a.length === 2) {
             puzzles.push({word: a[0], hint: a[1]})
+            if (hints_count[a[1]])
+                hints_count[a[1]]++
+            else
+                hints_count[a[1]] = 1
+        }
     }
+    // console.log(hints_count)
 }
 
 reload_puzzles()

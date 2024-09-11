@@ -12,6 +12,7 @@ export class Player
 {
     public name: string
     public token: number
+    private icon: string
     private point: number
     private credit: number
     private online: boolean
@@ -21,6 +22,7 @@ export class Player
     constructor(token: number, name: string, emitter: Emitter) {
         this.name = name
         this.token = token
+        this.icon = 'girl'
         this.point = 0
         this.credit = 0
         this.list = {next: this, prev: this}
@@ -30,11 +32,16 @@ export class Player
     }
 
     info() {
-        return {name: this.name, point: this.get_point(), online: this.get_online()}
+        return {name: this.name, icon: this.icon, point: this.get_point(), online: this.get_online()}
     }
 
     emit(type: string, data?: any) {
         this.emitter.emit(this.token, type, data)
+    }
+
+    update_icon(icon: string) {
+        this.icon = icon
+        this.emitter.emit(EMIT_TO_ALL, 'update-icon', {name: this.name, icon})
     }
 
     chat(msg: string) {
@@ -66,11 +73,15 @@ export class Player
     }
 
     set_online() {
+        if (this.online)
+            return
         this.online = true
         this.emitter.emit(EMIT_TO_ALL, 'join', {name: this.name})
     }
 
     set_offline() {
+        if (!this.online)
+            return
         this.online = false
         this.emitter.emit(EMIT_TO_ALL, 'leave', {name: this.name})
     }
