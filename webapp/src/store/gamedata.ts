@@ -148,6 +148,11 @@ const gameData = {
             content: '建议您在系统浏览器中打开本游戏，启用全屏模式体验更佳~',
             notify: true
           })
+          commit('add_msg', {
+            author: '【重要】',
+            content: '游戏地址已迁移至' + window.location.href + '。目前，访问旧地址将自动跳转至新地址。旧地址将于11月9日失效，建议您及时更新保存的链接。',
+            notify: true
+          })
           first_connect = false
         }
       })
