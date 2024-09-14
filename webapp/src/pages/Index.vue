@@ -19,7 +19,7 @@
         <q-chip v-for="p in players" :key="p.name" clickable @click="click_user(p)" v-ripple
                 :color="p.action ? 'accent' : (p.success ? 'positive' : p.local_bg_color)"
                 :text-color="p.action ? 'white' : (p.success ? 'white' : '')"
-                :icon="p.action ? 'brush' : (p.success ? 'check' : p.icon)">
+                :icon="p.action ? 'brush' : (p.success ? 'check' : 'roller_skating')">
           {{p.name}}
           <q-badge :color="p.name === name ? 'primary' : (p.online ? 'secondary' : 'negative')"
                    floating transparent>

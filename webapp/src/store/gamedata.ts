@@ -13,7 +13,13 @@ const icon_list: string[] = ['person', 'groups', 'account_circle', 'face', 'grou
   'elderly', 'diversity_1', 'personal_injury', 'attribution', 'surfing', 'sports_handball', 'run_circle', 'airline_seat_recline_normal',
   'diversity_2', 'kayaking', 'remember_me', 'downhill_skiing', 'skateboarding', 'boy', 'hot_tub', 'sports_martial_arts',
   'nordic_walking', 'girl', 'airline_seat_recline_extra', 'face_6', 'snowboarding', 'local_hotel', 'elderly_woman',
-  'person_2', 'sledding', 'face_2', 'face_4', 'airline_seat_individual_suite', 'face_5', 'person_4', 'person_3', 'assist_walker']
+  'person_2', 'sledding', 'face_2', 'face_4', 'airline_seat_individual_suite', 'face_5', 'person_4', 'person_3', 'assist_walker',
+  'pets', 'cruelty_free', 'emoji_nature', 'spa', 'home', 'apartment', 'cottage', 'grass', 'shower', 'kitchen', 'chair', 'bed',
+  'holiday_village', 'weekend', 'electric_bolt', 'outdoor_grill', 'foundation', 'deck', 'gite', 'villa', 'night_shelter',
+  'bedtime', 'microwave', 'chair_alt', 'single_bed', 'countertops', 'doorbell', 'shield_moon', 'houseboat', 'wind_power',
+  'local_shipping', 'directions_car', 'sports_esports', 'flight', 'directions_bus', 'sports_soccer', 'directions_bike',
+  'train', 'airport_shuttle', 'hiking', 'two_wheeler', 'directions_boat', 'pedal_bike', 'sailing', 'sports_bar', 'sports',
+  'sports_tennis', 'sports_motorsports', 'sports_baseball', 'sports_volleyball', 'sports_football', 'sports_cricket']
 
 export interface Player {
   name: string,
@@ -150,7 +156,7 @@ const gameData = {
           })
           commit('add_msg', {
             author: '【重要】',
-            content: '游戏地址已迁移至' + window.location.href + '。目前，访问旧地址将自动跳转至新地址。旧地址将于11月9日失效，建议您及时更新保存的链接。',
+            content: '游戏地址已迁移至' + window.location.host + '。目前，新旧地址均可使用，访问旧地址时将自动跳转至新地址。旧地址将于11月9日失效，建议您及时更新保存的链接。',
             notify: true
           })
           first_connect = false
