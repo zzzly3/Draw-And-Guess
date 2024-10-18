@@ -324,20 +324,32 @@ export default defineComponent({
           localStorage.setItem('token', String(token))
         }
         if (!name) {
-          $q.dialog({
-            title: '登录',
-            message: '输入一个昵称（2-9个字）或输入guest进入旁观模式',
-            prompt: {
-              model: '',
-              isValid: val => val.trim().length >= 2 && val.trim().length <= 9,
-              type: 'text'
-            },
-            persistent: true
-          }).onOk(data => {
-            name = String(data).trim()
-            sessionStorage.setItem('name', name)
-            void store.dispatch('gameData/connect', {token, name, drawfn})
-          })
+          const show_login = () => {
+            $q.dialog({
+              title: '登录',
+              message: '输入一个昵称（2-9个字）或输入guest进入旁观模式',
+              prompt: {
+                model: '',
+                isValid: val => val.trim().length >= 2 && val.trim().length <= 9,
+                type: 'text'
+              },
+              persistent: true
+            }).onOk(data => {
+              name = String(data).trim()
+              sessionStorage.setItem('name', name)
+              void store.dispatch('gameData/connect', {token, name, drawfn})
+            })
+          }
+          if (navigator.userAgent.indexOf('WeChat') >= 0) {
+            $q.dialog({
+              title: '提示',
+              message: '您正在微信APP内打开本游戏，可能导致您回复微信消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。'
+            }).onOk(() => {
+              show_login()
+            })
+          } else {
+            show_login()
+          }
         } else {
           console.log(token, name)
           void store.dispatch('gameData/connect', {token, name, drawfn})

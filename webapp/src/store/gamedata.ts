@@ -60,6 +60,7 @@ export interface GameData {
   selections: {id: number, word: string}[]
 }
 
+let delay_rank = false
 let rank: {score: number, name: string}[] = []
 let socket: ReturnType<typeof io>
 let first_connect = true
@@ -206,6 +207,15 @@ const gameData = {
           content: `游戏结束，第一名是【${rank[0]?.name}】，太厉害啦！`,
           notify: true
         })
+        if (!delay_rank) {
+          Dialog.create({
+            component: RankDialog,
+            componentProps: {
+              rank
+            }
+          })
+          rank = []
+        }
       })
       socket.on('gain-point', (data: {name: string, point: number}) => {
         commit('add_msg', {
@@ -241,6 +251,7 @@ const gameData = {
           content: `本轮结束，答案是【${data.answer}】，共${data.success.length}人答对！`,
           notify: true
         })
+        delay_rank = true
         Dialog.create({
           component: AnswerDialog,
           componentProps: {
@@ -257,6 +268,7 @@ const gameData = {
             })
             rank = []
           }
+          delay_rank = false
         })
       })
       socket.on('join', (user: {name: string}) => {
