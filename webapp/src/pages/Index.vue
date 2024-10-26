@@ -343,7 +343,8 @@ export default defineComponent({
           if (navigator.userAgent.indexOf('WeChat') >= 0) {
             $q.dialog({
               title: '提示',
-              message: '您正在微信APP内打开本游戏，可能导致您回复微信消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。'
+              message: '您正在微信APP内打开本游戏，可能导致您回复微信消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。',
+              persistent: true
             }).onDismiss(() => {
               show_login()
             })
