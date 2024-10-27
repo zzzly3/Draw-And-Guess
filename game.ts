@@ -5,6 +5,7 @@ import {get_puzzle_info, custom_puzzle, Puzzle, random_puzzles, format_variants}
 const selection_num = 6
 const select_timeout = 40
 const draw_timeout = 80
+const speedup_threshold = 0.8
 const reward_line = 10
 const reward_prob = 0.5
 
@@ -316,7 +317,8 @@ export class DrawAndGuess
                     player.add_point(this.players.size - this.success.size + (this.success.size === 1 ? 1 : 0))
                     if (this.success.size === this.players.size - 1) {
                         this.next_round()
-                    } else if (this.success.size === this.players.size - 2 && this.timer_time > (new Date()).getTime() / 1000 + 10) {
+                    } else if (this.success.size === Math.floor((this.players.size - 1) * speedup_threshold) && 
+                                this.timer_time > (new Date()).getTime() / 1000 + 10) {
                         this.reset_timer(10)
                         this.emit('speedup')
                     }

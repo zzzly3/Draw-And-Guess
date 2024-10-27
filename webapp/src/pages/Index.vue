@@ -16,7 +16,7 @@
     </div>
     <div class="col-auto full-width text-center q-px-sm q-pt-sm" style="overflow: auto">
       <div class="q-pa-sm text-center q-gutter-sm">
-        <q-chip v-for="p in players" :key="p.name" clickable @click="click_user(p)" v-ripple
+        <q-chip v-for="p in players_list_show" :key="p.name" clickable @click="click_user(p)" v-ripple
                 :color="p.action ? 'accent' : (p.success ? 'positive' : p.local_bg_color)"
                 :text-color="p.action ? 'white' : (p.success ? 'white' : '')"
                 :icon="p.action ? 'brush' : (p.success ? 'check' : p.icon)">
@@ -25,6 +25,9 @@
                    floating transparent>
             +{{p.point}}
           </q-badge>
+        </q-chip>
+        <q-chip clickable v-if="!show_offline&&offline_cnt" @click="show_offline=true" icon="wifi_off" text-color="negative" v-ripple>
+          {{offline_cnt}}
         </q-chip>
       </div>
     </div>
@@ -153,6 +156,14 @@ export default defineComponent({
       return store.state.gameData.info.state.credit
     })
 
+    let show_offline = ref(false)
+    const offline_cnt = computed(() => {
+      return store.state.gameData.info.players.length - players_list_show.value.length
+    })
+    const players_list_show = computed(() => {
+      return store.state.gameData.info.players.filter(p => show_offline.value || p.online)
+    })
+
     const selections = computed(() => {
       return store.state.gameData.selections
     })
@@ -182,6 +193,8 @@ export default defineComponent({
       // console.log(p)
       if (p.name === name.value && !p.action && !p.success)
         void store.dispatch('gameData/randomIcon')
+      else if (!p.online)
+        show_offline.value = false
     }
 
     const send_text = ref('')
@@ -199,9 +212,6 @@ export default defineComponent({
     const painter = computed(() => {
       const p = store.state.gameData.info.players.filter(i => i.action)
       return p.length ? p[0].name : ''
-    })
-    const players = computed(() => {
-      return store.state.gameData.info.players
     })
     const messages = computed(() => {
       return store.state.gameData.msg
@@ -363,9 +373,10 @@ export default defineComponent({
       connected, guest,
       name, credit,
       selections, select, custom_select,
-      painter, players, messages,
+      painter, messages,
       count_down, hint, answer,
       in_wait, in_select, in_draw,
+      show_offline, offline_cnt, players_list_show,
       chat, scroll_chat,
       start, click_user,
       send_text, send,
