@@ -91,295 +91,276 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 
-import {computed, defineComponent, nextTick, onMounted, Ref, ref, watch} from 'vue';
+import {computed, nextTick, onMounted, Ref, ref, watch} from 'vue';
 import {QVirtualScroll, useQuasar} from 'quasar';
 import PopupColorPicker from 'components/PopupColorPicker.vue';
 import { Player, useGameData } from 'stores/gamedata';
 
-export default defineComponent({
+defineOptions({
   name: 'IndexPage',
   components: {
     PopupColorPicker
-  },
-  setup() {
-    const gameData = useGameData()
-    const $q = useQuasar()
-
-    const chat = ref(null) as Ref<QVirtualScroll|null>
-    let last_scroll = 0
-    const scroll_chat = () => {
-      last_scroll = (new Date()).getTime()
-    }
-    watch(gameData.msg, () => {
-      if (last_scroll + 5000 < new Date().getTime()) {
-        void nextTick(() => chat.value?.scrollTo(gameData.msg.length))
-      }
-    })
-
-    const count_down = ref(0)
-    setInterval(() => {
-      const t = Math.round((new Date()).getTime() / 1000)
-      const t2 = gameData.info.state.timeout
-      count_down.value = Math.round(t2 && t < t2 ? t2 - t : 0)
-
-      // store.commit('gameData/add_msg', {author:'test',content:(new Date()).toString(),notify:false})
-    }, 1000)
-
-    const connected = computed(() => {
-      return gameData.connect
-    })
-    const in_wait = computed(() => {
-      return gameData.info.state.wait
-    })
-    const in_select = computed(() => {
-      return gameData.info.state.select
-    })
-    const in_draw = computed(() => {
-      return gameData.info.state.draw
-    })
-    const hint = computed(() => {
-      return gameData.info.state.hint
-    })
-    const answer = computed(() => {
-      return gameData.info.state.answer
-    })
-    const name = computed(() => {
-      return gameData.name
-    })
-    const guest = computed(() => {
-      return gameData.guest
-    })
-    const credit = computed(() => {
-      return gameData.info.state.credit
-    })
-
-    let show_offline = ref(false)
-    const offline_cnt = computed(() => {
-      return gameData.info.players.length - players_list_show.value.length
-    })
-    const players_list_show = computed(() => {
-      return gameData.info.players.filter(p => show_offline.value || p.online)
-    })
-
-    const selections = computed(() => {
-      return gameData.selections
-    })
-    const select = (id: number) => {
-      gameData.select(id)
-    }
-    const custom_select = () => {
-      $q.dialog({
-        title: '自定义词语',
-        message: '输入一个词语（不超过9个字）',
-        prompt: {
-          model: '',
-          isValid: val => val.trim().length > 0 && val.trim().length < 10,
-          type: 'text'
-        },
-        cancel: true
-      }).onOk(data => {
-        gameData.select(-1, String(data).trim())
-      })
-    }
-
-    const start = () => {
-      gameData.start()
-    }
-
-    const click_user = (p: Player) => {
-      // console.log(p)
-      if (p.name === name.value && !p.action && !p.success)
-        void gameData.random_icon()
-      else if (!p.online)
-        show_offline.value = false
-    }
-
-    const send_text = ref('')
-    const send = () => {
-      if (send_text.value) {
-        if (send_text.value[0] === '/') {
-          gameData.command(send_text.value.slice(1))
-        } else {
-          gameData.answer(send_text.value)
-        }
-        send_text.value = ''
-      }
-    }
-
-    const painter = computed(() => {
-      const p = gameData.info.players.filter(i => i.action)
-      return p.length ? p[0].name : ''
-    })
-    const messages = computed(() => {
-      return gameData.msg
-    })
-    
-    let canvas = null as HTMLCanvasElement|null
-    let ctx = null as CanvasRenderingContext2D|null
-    let isDrawing = false
-    let pathDrawing = [] as [number, number][]
-    let painterColor = ref('#000000')
-
-    const start_paint = (x: number, y: number) => {
-      if (!ctx) return
-      ctx.beginPath()
-      ctx.fillStyle = painterColor.value
-      ctx.arc(x, y, ctx.lineWidth / 2, 0, 2 * Math.PI)
-      ctx.fill()
-      pathDrawing = [[x, y]]
-    }
-    const end_paint = () => {
-      if (!ctx) return
-      gameData.draw(painterColor.value, pathDrawing)
-      pathDrawing = []
-    }
-    const in_paint = (x: number, y: number) => {
-      if (!ctx) return
-      ctx.beginPath()
-      ctx.strokeStyle = painterColor.value
-      ctx.moveTo(pathDrawing[pathDrawing.length - 1][0], pathDrawing[pathDrawing.length - 1][1])
-      ctx.lineTo(x, y)
-      ctx.stroke()
-      pathDrawing.push([x, y])
-    }
-    const canvas_mouse_down = (event: MouseEvent) => {
-      if (!canvas) return
-      if (guest.value || !(in_wait.value || (in_draw.value && painter.value === name.value))) return
-      const rect = canvas.getBoundingClientRect()
-      const x = (event.clientX - rect.left) / rect.width * canvas.width
-      const y = (event.clientY - rect.top) / rect.height * canvas.height
-      isDrawing = true
-      start_paint(x, y)
-    }
-    const canvas_mouse_move = (event: MouseEvent) => {
-      if (isDrawing) {
-        if (!canvas) return
-        const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left) / rect.width * canvas.width
-        const y = (event.clientY - rect.top) / rect.height * canvas.height
-        in_paint(x, y)
-      }
-    }
-    const canvas_mouse_up = () => {
-      if (isDrawing) {
-        end_paint()
-        isDrawing = false
-      }
-    }
-    const canvas_touch_start = (event: TouchEvent) => {
-      if (!canvas) return
-      if (guest.value || !(in_wait.value || (in_draw.value && painter.value === name.value))) return
-      const rect = canvas.getBoundingClientRect()
-      const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
-      const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height
-      isDrawing = true
-      start_paint(x, y)
-    }
-    const canvas_touch_move = (event: TouchEvent) => {
-      if (isDrawing) {
-        if (!canvas) return
-        const rect = canvas.getBoundingClientRect()
-        const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
-        const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height
-        in_paint(x, y)
-      }
-    }
-    const canvas_touch_end = () => {
-      if (isDrawing) {
-        end_paint()
-        isDrawing = false
-      }
-    }
-    const canvas_clear = () => {
-      if (!canvas || !ctx) return
-      gameData.draw('clear')
-      ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0)
-    }
-
-    onMounted(() => {
-      if (!gameData.token) {
-        canvas = document.getElementById('canvas') as HTMLCanvasElement
-        canvas.width = 1000
-        canvas.height = 1000
-        ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        ctx.lineWidth = 8
-        const drawfn = (type: string, points: [number, number][]) => {
-          if (!ctx || !canvas) return
-          if (type === 'clear') {
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-            return
-          }
-          ctx.strokeStyle = type
-          ctx.fillStyle = type
-          ctx.beginPath()
-          ctx.arc(points[0][0], points[0][1], ctx.lineWidth / 2, 0, 2 * Math.PI)
-          ctx.fill()
-          ctx.beginPath()
-          for (const p of points) {
-            ctx.lineTo(p[0], p[1])
-          }
-          ctx.stroke()
-        }
-        let token = Number(localStorage.getItem('token'))
-        let name = sessionStorage.getItem('name')
-        if (!token) {
-          token = ((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000)
-          localStorage.setItem('token', String(token))
-        }
-        if (!name) {
-          const show_login = () => {
-            $q.dialog({
-              title: '登录',
-              message: '输入一个昵称（2-9个字）或输入guest进入旁观模式',
-              prompt: {
-                model: '',
-                isValid: val => val.trim().length >= 2 && val.trim().length <= 9,
-                type: 'text'
-              },
-              persistent: true
-            }).onOk(data => {
-              name = String(data).trim()
-              sessionStorage.setItem('name', name)
-              gameData.do_connect(token, name, drawfn)
-            })
-          }
-          if (navigator.userAgent.indexOf('WeChat') >= 0) {
-            $q.dialog({
-              title: '提示',
-              message: '您正在微信APP内打开本游戏，可能导致您回复微信消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。',
-              persistent: true
-            }).onDismiss(() => {
-              show_login()
-            })
-          } else {
-            show_login()
-          }
-        } else {
-          console.log(token, name)
-          gameData.do_connect(token, name, drawfn)
-        }
-      }
-    })
-
-    return {
-      painterColor,
-      connected, guest,
-      name, credit,
-      selections, select, custom_select,
-      painter, messages,
-      count_down, hint, answer,
-      in_wait, in_select, in_draw,
-      show_offline, offline_cnt, players_list_show,
-      chat, scroll_chat,
-      start, click_user,
-      send_text, send,
-      canvas_clear,
-      canvas_mouse_down, canvas_mouse_move, canvas_mouse_up,
-      canvas_touch_start, canvas_touch_move, canvas_touch_end
-    }
   }
 })
 
+const gameData = useGameData()
+const $q = useQuasar()
+
+const chat = ref(null) as Ref<QVirtualScroll|null>
+let last_scroll = 0
+const scroll_chat = () => {
+  last_scroll = (new Date()).getTime()
+}
+watch(gameData.msg, () => {
+  if (last_scroll + 5000 < new Date().getTime()) {
+    void nextTick(() => chat.value?.scrollTo(gameData.msg.length))
+  }
+})
+
+const count_down = ref(0)
+setInterval(() => {
+  const t = Math.round((new Date()).getTime() / 1000)
+  const t2 = gameData.info.state.timeout
+  count_down.value = Math.round(t2 && t < t2 ? t2 - t : 0)
+
+  // store.commit('gameData/add_msg', {author:'test',content:(new Date()).toString(),notify:false})
+}, 1000)
+
+const connected = computed(() => {
+  return gameData.connect
+})
+const in_wait = computed(() => {
+  return gameData.info.state.wait
+})
+const in_select = computed(() => {
+  return gameData.info.state.select
+})
+const in_draw = computed(() => {
+  return gameData.info.state.draw
+})
+const hint = computed(() => {
+  return gameData.info.state.hint
+})
+const answer = computed(() => {
+  return gameData.info.state.answer
+})
+const name = computed(() => {
+  return gameData.name
+})
+const guest = computed(() => {
+  return gameData.guest
+})
+const credit = computed(() => {
+  return gameData.info.state.credit
+})
+
+let show_offline = ref(false)
+const offline_cnt = computed(() => {
+  return gameData.info.players.length - players_list_show.value.length
+})
+const players_list_show = computed(() => {
+  return gameData.info.players.filter(p => show_offline.value || p.online)
+})
+
+const selections = computed(() => {
+  return gameData.selections
+})
+const select = (id: number) => {
+  gameData.select(id)
+}
+const custom_select = () => {
+  $q.dialog({
+    title: '自定义词语',
+    message: '输入一个词语（不超过9个字）',
+    prompt: {
+      model: '',
+      isValid: val => val.trim().length > 0 && val.trim().length < 10,
+      type: 'text'
+    },
+    cancel: true
+  }).onOk(data => {
+    gameData.select(-1, String(data).trim())
+  })
+}
+
+const start = () => {
+  gameData.start()
+}
+
+const click_user = (p: Player) => {
+  // console.log(p)
+  if (p.name === name.value && !p.action && !p.success)
+    void gameData.random_icon()
+  else if (!p.online)
+    show_offline.value = false
+}
+
+const send_text = ref('')
+const send = () => {
+  if (send_text.value) {
+    if (send_text.value[0] === '/') {
+      gameData.command(send_text.value.slice(1))
+    } else {
+      gameData.answer(send_text.value)
+    }
+    send_text.value = ''
+  }
+}
+
+const painter = computed(() => {
+  const p = gameData.info.players.filter(i => i.action)
+  return p.length ? p[0].name : ''
+})
+const messages = computed(() => {
+  return gameData.msg
+})
+
+let canvas = null as HTMLCanvasElement|null
+let ctx = null as CanvasRenderingContext2D|null
+let isDrawing = false
+let pathDrawing = [] as [number, number][]
+let painterColor = ref('#000000')
+
+const start_paint = (x: number, y: number) => {
+  if (!ctx) return
+  ctx.beginPath()
+  ctx.fillStyle = painterColor.value
+  ctx.arc(x, y, ctx.lineWidth / 2, 0, 2 * Math.PI)
+  ctx.fill()
+  pathDrawing = [[x, y]]
+}
+const end_paint = () => {
+  if (!ctx) return
+  gameData.draw(painterColor.value, pathDrawing)
+  pathDrawing = []
+}
+const in_paint = (x: number, y: number) => {
+  if (!ctx) return
+  ctx.beginPath()
+  ctx.strokeStyle = painterColor.value
+  ctx.moveTo(pathDrawing[pathDrawing.length - 1][0], pathDrawing[pathDrawing.length - 1][1])
+  ctx.lineTo(x, y)
+  ctx.stroke()
+  pathDrawing.push([x, y])
+}
+const canvas_mouse_down = (event: MouseEvent) => {
+  if (!canvas) return
+  if (guest.value || !(in_wait.value || (in_draw.value && painter.value === name.value))) return
+  const rect = canvas.getBoundingClientRect()
+  const x = (event.clientX - rect.left) / rect.width * canvas.width
+  const y = (event.clientY - rect.top) / rect.height * canvas.height
+  isDrawing = true
+  start_paint(x, y)
+}
+const canvas_mouse_move = (event: MouseEvent) => {
+  if (isDrawing) {
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const x = (event.clientX - rect.left) / rect.width * canvas.width
+    const y = (event.clientY - rect.top) / rect.height * canvas.height
+    in_paint(x, y)
+  }
+}
+const canvas_mouse_up = () => {
+  if (isDrawing) {
+    end_paint()
+    isDrawing = false
+  }
+}
+const canvas_touch_start = (event: TouchEvent) => {
+  if (!canvas) return
+  if (guest.value || !(in_wait.value || (in_draw.value && painter.value === name.value))) return
+  const rect = canvas.getBoundingClientRect()
+  const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
+  const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height
+  isDrawing = true
+  start_paint(x, y)
+}
+const canvas_touch_move = (event: TouchEvent) => {
+  if (isDrawing) {
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const x = (event.touches[0].clientX - rect.left) / rect.width * canvas.width
+    const y = (event.touches[0].clientY - rect.top) / rect.height * canvas.height
+    in_paint(x, y)
+  }
+}
+const canvas_touch_end = () => {
+  if (isDrawing) {
+    end_paint()
+    isDrawing = false
+  }
+}
+const canvas_clear = () => {
+  if (!canvas || !ctx) return
+  gameData.draw('clear')
+  ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0)
+}
+
+onMounted(() => {
+  if (!gameData.token) {
+    canvas = document.getElementById('canvas') as HTMLCanvasElement
+    canvas.width = 1000
+    canvas.height = 1000
+    ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    ctx.lineWidth = 8
+    const drawfn = (type: string, points: [number, number][]) => {
+      if (!ctx || !canvas) return
+      if (type === 'clear') {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        return
+      }
+      ctx.strokeStyle = type
+      ctx.fillStyle = type
+      ctx.beginPath()
+      ctx.arc(points[0][0], points[0][1], ctx.lineWidth / 2, 0, 2 * Math.PI)
+      ctx.fill()
+      ctx.beginPath()
+      for (const p of points) {
+        ctx.lineTo(p[0], p[1])
+      }
+      ctx.stroke()
+    }
+    let token = Number(localStorage.getItem('token'))
+    let name = sessionStorage.getItem('name')
+    if (!token) {
+      token = ((new Date()).getTime() % 1000000) * 1000 + Math.floor(Math.random() * 1000)
+      localStorage.setItem('token', String(token))
+    }
+    if (!name) {
+      const show_login = () => {
+        $q.dialog({
+          title: '登录',
+          message: '输入一个昵称（2-9个字）或输入guest进入旁观模式',
+          prompt: {
+            model: '',
+            isValid: val => val.trim().length >= 2 && val.trim().length <= 9,
+            type: 'text'
+          },
+          persistent: true
+        }).onOk(data => {
+          name = String(data).trim()
+          sessionStorage.setItem('name', name)
+          gameData.do_connect(token, name, drawfn)
+        })
+      }
+      if (navigator.userAgent.indexOf('WeChat') >= 0) {
+        $q.dialog({
+          title: '提示',
+          message: '您正在微信APP内打开本游戏，可能导致您回复微信消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。',
+          persistent: true
+        }).onDismiss(() => {
+          show_login()
+        })
+      } else {
+        show_login()
+      }
+    } else {
+      console.log(token, name)
+      gameData.do_connect(token, name, drawfn)
+    }
+  }
+})
 </script>
