@@ -94,10 +94,9 @@
 <script lang="ts">
 
 import {computed, defineComponent, nextTick, onMounted, Ref, ref, watch} from 'vue';
-import {useStore} from 'src/store';
 import {QVirtualScroll, useQuasar} from 'quasar';
-import PopupColorPicker from 'src/components/PopupColorPicker.vue';
-import { Player } from 'src/store/gamedata';
+import PopupColorPicker from 'components/PopupColorPicker.vue';
+import { Player, useGameData } from 'stores/gamedata';
 
 export default defineComponent({
   name: 'IndexPage',
@@ -105,7 +104,7 @@ export default defineComponent({
     PopupColorPicker
   },
   setup() {
-    const store = useStore()
+    const gameData = useGameData()
     const $q = useQuasar()
 
     const chat = ref(null) as Ref<QVirtualScroll|null>
@@ -113,62 +112,62 @@ export default defineComponent({
     const scroll_chat = () => {
       last_scroll = (new Date()).getTime()
     }
-    watch(store.state.gameData.msg, () => {
+    watch(gameData.msg, () => {
       if (last_scroll + 5000 < new Date().getTime()) {
-        void nextTick(() => chat.value?.scrollTo(store.state.gameData.msg.length))
+        void nextTick(() => chat.value?.scrollTo(gameData.msg.length))
       }
     })
 
     const count_down = ref(0)
     setInterval(() => {
       const t = Math.round((new Date()).getTime() / 1000)
-      const t2 = store.state.gameData.info.state.timeout
+      const t2 = gameData.info.state.timeout
       count_down.value = Math.round(t2 && t < t2 ? t2 - t : 0)
 
       // store.commit('gameData/add_msg', {author:'test',content:(new Date()).toString(),notify:false})
     }, 1000)
 
     const connected = computed(() => {
-      return store.state.gameData.connect
+      return gameData.connect
     })
     const in_wait = computed(() => {
-      return store.state.gameData.info.state.wait
+      return gameData.info.state.wait
     })
     const in_select = computed(() => {
-      return store.state.gameData.info.state.select
+      return gameData.info.state.select
     })
     const in_draw = computed(() => {
-      return store.state.gameData.info.state.draw
+      return gameData.info.state.draw
     })
     const hint = computed(() => {
-      return store.state.gameData.info.state.hint
+      return gameData.info.state.hint
     })
     const answer = computed(() => {
-      return store.state.gameData.info.state.answer
+      return gameData.info.state.answer
     })
     const name = computed(() => {
-      return store.state.gameData.name
+      return gameData.name
     })
     const guest = computed(() => {
-      return store.state.gameData.guest
+      return gameData.guest
     })
     const credit = computed(() => {
-      return store.state.gameData.info.state.credit
+      return gameData.info.state.credit
     })
 
     let show_offline = ref(false)
     const offline_cnt = computed(() => {
-      return store.state.gameData.info.players.length - players_list_show.value.length
+      return gameData.info.players.length - players_list_show.value.length
     })
     const players_list_show = computed(() => {
-      return store.state.gameData.info.players.filter(p => show_offline.value || p.online)
+      return gameData.info.players.filter(p => show_offline.value || p.online)
     })
 
     const selections = computed(() => {
-      return store.state.gameData.selections
+      return gameData.selections
     })
     const select = (id: number) => {
-      void store.dispatch('gameData/select', {id, custom: ''})
+      gameData.select(id)
     }
     const custom_select = () => {
       $q.dialog({
@@ -181,18 +180,18 @@ export default defineComponent({
         },
         cancel: true
       }).onOk(data => {
-        void store.dispatch('gameData/select', {id: -1, custom: String(data).trim()})
+        gameData.select(-1, String(data).trim())
       })
     }
 
     const start = () => {
-      void store.dispatch('gameData/start')
+      gameData.start()
     }
 
     const click_user = (p: Player) => {
       // console.log(p)
       if (p.name === name.value && !p.action && !p.success)
-        void store.dispatch('gameData/randomIcon')
+        void gameData.random_icon()
       else if (!p.online)
         show_offline.value = false
     }
@@ -201,20 +200,20 @@ export default defineComponent({
     const send = () => {
       if (send_text.value) {
         if (send_text.value[0] === '/') {
-          void store.dispatch('gameData/command', send_text.value.slice(1))
+          gameData.command(send_text.value.slice(1))
         } else {
-          void store.dispatch('gameData/answer', send_text.value)
+          gameData.answer(send_text.value)
         }
         send_text.value = ''
       }
     }
 
     const painter = computed(() => {
-      const p = store.state.gameData.info.players.filter(i => i.action)
+      const p = gameData.info.players.filter(i => i.action)
       return p.length ? p[0].name : ''
     })
     const messages = computed(() => {
-      return store.state.gameData.msg
+      return gameData.msg
     })
     
     let canvas = null as HTMLCanvasElement|null
@@ -239,7 +238,7 @@ export default defineComponent({
       if (!ctx) return
       ctx.stroke()
       ctx.beginPath()
-      void store.dispatch('gameData/draw', {type: painterColor.value, points: pathDrawing})
+      gameData.draw(painterColor.value, pathDrawing)
       pathDrawing = []
     }
     const in_paint = (x: number, y: number) => {
@@ -300,12 +299,12 @@ export default defineComponent({
     }
     const canvas_clear = () => {
       if (!canvas || !ctx) return
-      void store.dispatch('gameData/draw', {type: 'clear', points: []})
+      gameData.draw('clear')
       ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0)
     }
 
     onMounted(() => {
-      if (!store.state.gameData.token) {
+      if (!gameData.token) {
         canvas = document.getElementById('canvas') as HTMLCanvasElement
         canvas.width = 1000
         canvas.height = 1000
@@ -347,7 +346,7 @@ export default defineComponent({
             }).onOk(data => {
               name = String(data).trim()
               sessionStorage.setItem('name', name)
-              void store.dispatch('gameData/connect', {token, name, drawfn})
+              gameData.do_connect(token, name, drawfn)
             })
           }
           if (navigator.userAgent.indexOf('WeChat') >= 0) {
@@ -363,7 +362,7 @@ export default defineComponent({
           }
         } else {
           console.log(token, name)
-          void store.dispatch('gameData/connect', {token, name, drawfn})
+          gameData.do_connect(token, name, drawfn)
         }
       }
     })
