@@ -221,32 +221,27 @@ export default defineComponent({
     let isDrawing = false
     let pathDrawing = [] as [number, number][]
     let painterColor = ref('#000000')
-    watch(painterColor, () => {
-      if (ctx) {
-        ctx.strokeStyle = painterColor.value
-      }
-    })
+
     const start_paint = (x: number, y: number) => {
       if (!ctx) return
       ctx.beginPath()
-      ctx.moveTo(x, y)
-      ctx.arc(x, y, ctx.lineWidth / 10, 0, 2 * Math.PI)
+      ctx.fillStyle = painterColor.value
+      ctx.arc(x, y, ctx.lineWidth / 2, 0, 2 * Math.PI)
       ctx.fill()
       pathDrawing = [[x, y]]
     }
     const end_paint = () => {
       if (!ctx) return
-      ctx.stroke()
-      ctx.beginPath()
       gameData.draw(painterColor.value, pathDrawing)
       pathDrawing = []
     }
     const in_paint = (x: number, y: number) => {
       if (!ctx) return
+      ctx.beginPath()
+      ctx.strokeStyle = painterColor.value
+      ctx.moveTo(pathDrawing[pathDrawing.length - 1][0], pathDrawing[pathDrawing.length - 1][1])
       ctx.lineTo(x, y)
       ctx.stroke()
-      ctx.beginPath()
-      ctx.moveTo(x, y)
       pathDrawing.push([x, y])
     }
     const canvas_mouse_down = (event: MouseEvent) => {
@@ -317,14 +312,15 @@ export default defineComponent({
             return
           }
           ctx.strokeStyle = type
+          ctx.fillStyle = type
           ctx.beginPath()
-          ctx.arc(points[0][0], points[0][1], ctx.lineWidth / 10, 0, 2 * Math.PI)
+          ctx.arc(points[0][0], points[0][1], ctx.lineWidth / 2, 0, 2 * Math.PI)
           ctx.fill()
+          ctx.beginPath()
           for (const p of points) {
             ctx.lineTo(p[0], p[1])
           }
           ctx.stroke()
-          ctx.strokeStyle = painterColor.value
         }
         let token = Number(localStorage.getItem('token'))
         let name = sessionStorage.getItem('name')
