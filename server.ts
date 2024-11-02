@@ -6,9 +6,10 @@ import { Whiteboard } from "./whiteboard";
 import { reload_puzzles } from "./puzzles";
 
 function get_version() {
-    const game_ver = statSync('./game.ts').mtime.toLocaleString()
+    const server_ver = statSync('./game.ts').mtime.toLocaleString()
+    const client_ver = statSync('./webapp/src/pages/Index.vue').mtime.toLocaleString()
     const puzzle_ver = statSync('./puzzles.txt').mtime.toLocaleString()
-    return `Draw And Guess\nby zzzly3<z@tanre.cn>\nGame version: ${game_ver}\nPuzzle version: ${puzzle_ver}`
+    return `Draw And Guess\nby zzzly3<z@tanre.cn>\nServer version: ${server_ver}\nUI version: ${client_ver}\nPuzzle version: ${puzzle_ver}`
 }
 
 let version = get_version()
