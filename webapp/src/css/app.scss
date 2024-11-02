@@ -16,13 +16,13 @@ body {
 }
 
 .flex-content-width {
-  width: 100%;
+  width: auto;
 }
 
-@for $i from 4 through 10 {
-  @media screen and (min-height: #{$i * 200px}) {
-    .flex-content-width {
-      max-width: #{$i * 150px};
-    }
-  }
-}
+// @for $i from 8 through 21 {
+//   @media screen and (min-height: #{$i * 100px}) {
+//     .flex-content-width {
+//       max-width: #{$i * 100px - 400px};
+//     }
+//   }
+// }

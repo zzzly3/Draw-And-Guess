@@ -1,6 +1,6 @@
 <template>
   <div class="fullscreen column content-start">
-    <div class="col-1" style="overflow: auto">
+    <div class="col-auto" style="overflow: auto; height: 75px;">
       <q-bar class="full-height full-width bg-header row justify-center">
         <q-img src="~assets/qiao2.jpg" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
         <div class="text-center col-auto self-center" style="font-size: inherit">
@@ -64,7 +64,7 @@
               @mousedown="canvas_mouse_down" @mouseup="canvas_mouse_up" @mousemove.prevent="canvas_mouse_move"
               @touchstart="canvas_touch_start" @touchend="canvas_touch_end" @touchmove.prevent="canvas_touch_move" />
     </div>
-    <div class="col-xs-3 col-sm-2 full-width q-px-md q-pt-sm" style="overflow: auto">
+    <div class="col-auto full-width q-px-md q-pt-sm" style="overflow: auto; height: 16em;">
       <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
         <q-item :key="index" dense class="text-caption" style="min-height:18px;" >
