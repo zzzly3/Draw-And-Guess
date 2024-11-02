@@ -59,12 +59,12 @@
         </span>
       </q-bar>
     </div>
-    <div class="col full-width q-px-md">
+    <div class="col self-center flex-content-width q-px-md" >
       <canvas id="canvas" class="full-width bg-lime-1 shadow-1" style="height: 100%"
               @mousedown="canvas_mouse_down" @mouseup="canvas_mouse_up" @mousemove.prevent="canvas_mouse_move"
               @touchstart="canvas_touch_start" @touchend="canvas_touch_end" @touchmove.prevent="canvas_touch_move" />
     </div>
-    <div class="col-3 full-width q-px-md q-pt-sm" style="overflow: auto">
+    <div class="col-xs-3 col-sm-2 full-width q-px-md q-pt-sm" style="overflow: auto">
       <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
         <q-item :key="index" dense class="text-caption" style="min-height:18px;" >

@@ -12,5 +12,17 @@
 }
 
 body {
-  @extend .bg-body
+  @extend .bg-body;
+}
+
+.flex-content-width {
+  width: 100%;
+}
+
+@for $i from 4 through 10 {
+  @media screen and (min-height: #{$i * 200px}) {
+    .flex-content-width {
+      max-width: #{$i * 150px};
+    }
+  }
 }
