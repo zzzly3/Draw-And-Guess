@@ -64,7 +64,7 @@
               @mousedown="canvas_mouse_down" @mouseup="canvas_mouse_up" @mousemove.prevent="canvas_mouse_move"
               @touchstart="canvas_touch_start" @touchend="canvas_touch_end" @touchmove.prevent="canvas_touch_move" />
     </div>
-    <div class="col-auto full-width q-px-md q-pt-sm" style="overflow: auto; height: 16em;">
+    <div class="col-xs-3 col-sm-2 full-width q-px-md q-pt-sm" style="overflow: auto">
       <q-virtual-scroll style="height: 100%" component="q-list" class="bg-outstanding rounded-borders"
                         @scroll="scroll_chat" ref="chat" :items="messages" v-slot="{ item, index }">
         <q-item :key="index" dense class="text-caption" style="min-height:18px;" >

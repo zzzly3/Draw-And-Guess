@@ -19,10 +19,10 @@ body {
   width: 100%;
 }
 
-@for $i from 8 through 21 {
-  @media screen and (min-height: #{$i * 100px}) {
+@for $i from 4 through 10 {
+  @media screen and (min-height: #{$i * 200px}) {
     .flex-content-width {
-      max-width: #{$i * 100px - 400px};
+      max-width: #{$i * 150px};
     }
   }
 }
