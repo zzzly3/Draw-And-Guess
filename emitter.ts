@@ -9,11 +9,15 @@ export class Emitter
     private io: Server
     private sockets: Map<number, Socket>
     private messages: {to: number, type: string, data: any}[]
+    private lastest_only: string[]
+    private latest_msg: Map<string, number>
 
-    constructor(io: Server) {
+    constructor(io: Server, lastest_only: string[]) {
         this.io = io
         this.sockets = new Map()
         this.messages = []
+        this.lastest_only = lastest_only
+        this.latest_msg = new Map()
     }
 
     join(token: number, socket: Socket) {
@@ -40,7 +44,10 @@ export class Emitter
     }
 
     send() {
-        for (let msg of this.messages) {
+        for (let mid = 0; mid < this.messages.length; mid++) {
+            const msg = this.messages[mid]
+            if (this.lastest_only.indexOf(msg.type) > -1 && this.latest_msg.get(msg.type + '\n' + String(msg.to)) !== mid)
+                continue
             if (msg.to > 0) {
                 this.sockets.get(msg.to)?.emit(msg.type, msg.data)
             } else {
@@ -58,6 +65,7 @@ export class Emitter
             }
         }
         this.messages = []
+        this.latest_msg.clear()
     }
 
     emit(to: number, type: string, data?: any) {
@@ -65,9 +73,7 @@ export class Emitter
             data = JSON.parse(JSON.stringify(data))
         if (['start', 'end', 'join', 'leave', 'chat', 'gain-point', 'selections', 'gain-credit'].indexOf(type) > -1)
             console.log(type, data)
-        if (type === 'update-all') { // remove old update-all
-            this.messages = this.messages.filter(msg => msg.type !== 'update-all' || msg.to !== to)
-        }
+        this.latest_msg.set(type + '\n' + String(to), this.messages.length)
         this.messages.push({to, type, data})
     }
 }

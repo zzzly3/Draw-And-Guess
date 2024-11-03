@@ -8,6 +8,7 @@ const draw_timeout = 80
 const speedup_threshold = 0.8
 const reward_line = 10
 const reward_prob = 0.5
+const data_left_timeout = 60
 
 export class Player
 {
@@ -71,6 +72,8 @@ export class Player
     detach() {
         this.list.next.list.prev = this.list.prev
         this.list.prev.list.next = this.list.next
+        this.list.next = this
+        this.list.prev = this
     }
 
     set_online() {
@@ -146,6 +149,7 @@ export class DrawAndGuess
     private timer_time: number
     private puzzle: Puzzle
     private readonly whiteboard: Whiteboard
+    private player_data_left: Map<number, {creat_time: number, data: Player}>
 
     constructor(emitter: Emitter, whiteboard: Whiteboard) {
         this.players = new Map()
@@ -158,6 +162,7 @@ export class DrawAndGuess
         this.timer = null
         this.timer_time = 0
         this.puzzle = {word: '', hint: ''}
+        this.player_data_left = new Map()
     }
 
     emit(type: string, data?: any) {
@@ -210,6 +215,12 @@ export class DrawAndGuess
                 player = p
             }
         } else {
+            const p = this.player_data_left.get(player.token)
+            if (p) {
+                p.data.name = player.name
+                player = p.data
+                this.player_data_left.delete(player.token)
+            }
             let fp = this.players.values().next()
             if (!fp.done)
                 fp.value.get_prev().attach(player)
@@ -228,6 +239,12 @@ export class DrawAndGuess
         if (this.state === GameState.Wait) {
             this.players.delete(player.token)
             player.detach()
+            this.player_data_left.set(player.token, {creat_time: (new Date()).getTime(), data: player})
+            setTimeout(() => {
+                const data = this.player_data_left.get(player.token)
+                if (data && data.creat_time + data_left_timeout * 1000 <= (new Date()).getTime())
+                    this.player_data_left.delete(player.token)
+            }, data_left_timeout * 1000 + 100)
         } else if (this.state === GameState.Select) {
             if (player === this.painter)
                 this.next_round()

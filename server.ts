@@ -16,7 +16,7 @@ let version = get_version()
 console.log(version)
 
 const io = new Server(3000)
-const emitter = new Emitter(io)
+const emitter = new Emitter(io, ['update-all', 'update-icon'])
 const whiteboard = new Whiteboard(emitter)
 const game = new DrawAndGuess(emitter, whiteboard)
 
