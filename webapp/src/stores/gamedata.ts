@@ -124,7 +124,6 @@ export const useGameData = defineStore('gamedata', {
         this.connect = true
         if (first_connect) {
           this.add_msg( '【提示】建议您在系统浏览器中打开本游戏，启用全屏模式体验更佳~')
-          this.add_msg('【重要】游戏地址已迁移至' + window.location.host + '。目前，新旧地址均可使用，访问旧地址时将自动跳转至新地址。旧地址将于11月9日失效，建议您及时更新保存的链接。')
           first_connect = false
         }
       })
