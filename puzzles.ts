@@ -9,23 +9,28 @@ let puzzles: Puzzle[] = []
 
 export function reload_puzzles() {
     puzzles = []
-    const hints_count: {[key: string]: number} = {}
     const data = fs.readFileSync('puzzles.txt')
     const lines = data.toString().split('\n')
     for (let line of lines) {
         const a = line.trim().split(',')
         if (a.length === 2) {
             puzzles.push({word: a[0], hint: a[1]})
-            if (hints_count[a[1]])
-                hints_count[a[1]]++
-            else
-                hints_count[a[1]] = 1
         }
     }
-    // console.log(hints_count)
 }
 
 reload_puzzles()
+
+export function count_hints() {
+    const hints_count: {[key: string]: number} = {}
+    puzzles.forEach(i => {
+        if (hints_count[i.hint])
+            hints_count[i.hint]++
+        else
+            hints_count[i.hint] = 1
+    })
+    return hints_count
+}
 
 export function format_variants(word: string) {
     word = word.trim().toUpperCase()

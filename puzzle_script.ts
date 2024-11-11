@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import {sync_puzzle, add_puzzle} from './puzzles';
+import {sync_puzzle, add_puzzle, count_hints} from './puzzles';
 
 const data = fs.readFileSync('plain.txt')
 const lines = data.toString().split('\n')
@@ -14,4 +14,5 @@ for (let line of lines) {
     }
 }
 
+console.log(count_hints())
 sync_puzzle()
