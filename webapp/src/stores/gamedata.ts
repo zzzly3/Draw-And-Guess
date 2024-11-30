@@ -214,7 +214,7 @@ export const useGameData = defineStore('gamedata', {
       })
       socket.on('draw', (data: {from: number, type: string, points: [number, number][]}) => {
         // console.log(data)
-        if (data.from === token)
+        if (data.from === token % 100003)
           return
         drawfn(data.type, data.points)
       })

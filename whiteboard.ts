@@ -18,7 +18,7 @@ export class Whiteboard
         } else {
             this.actions.push(action)
         }
-        this.emitter.emit(0, 'draw', {from: actor, type: action.type, points: action.points})
+        this.emitter.emit(0, 'draw', {from: actor % 100003, type: action.type, points: action.points})
     }
     send_actions(target: number) {
         for (let action of this.actions) {
