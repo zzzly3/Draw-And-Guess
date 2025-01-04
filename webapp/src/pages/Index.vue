@@ -2,7 +2,7 @@
   <div class="fullscreen column content-start">
     <div class="col-auto" style="overflow: auto; height: 75px;">
       <q-bar class="full-height full-width bg-header row justify-center">
-        <q-img src="~assets/qiao2.jpg" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
+        <q-img src="~assets/qiao3.png" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
         <div class="text-center col-auto self-center" style="font-size: inherit">
           <span v-if="in_draw&&painter!==name" class="text-weight-bold text-accent">{{guest?answer:''}}（提示：{{hint}}）</span>
           <span v-else>常鸽 - 你想我拆</span>
@@ -60,7 +60,7 @@
       </q-bar>
     </div>
     <div class="col self-center flex-content-width q-px-md" >
-      <canvas id="canvas" class="full-width bg-lime-1 shadow-1" style="height: 100%"
+      <canvas id="canvas" class="full-width bg-timoxi shadow-1" style="height: 100%;"
               @mousedown="canvas_mouse_down" @mouseup="canvas_mouse_up" @mousemove.prevent="canvas_mouse_move"
               @touchstart="canvas_touch_start" @touchend="canvas_touch_end" @touchmove.prevent="canvas_touch_move" />
     </div>

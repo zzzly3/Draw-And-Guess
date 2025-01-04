@@ -11,6 +11,12 @@
   background-color: $amber-12
 }
 
+.bg-timoxi {
+  background-image: linear-gradient(rgba($lime-1, 0.75), rgba($lime-1, 0.75)), url('bg.avif');
+  background-size: cover;
+  background-position: center;
+}
+
 body {
   @extend .bg-body;
 }
