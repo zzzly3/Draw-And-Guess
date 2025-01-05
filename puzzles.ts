@@ -50,7 +50,9 @@ export function format_variants(word: string) {
     word = word.replace('!', '！')
     word = word.replace(';', '；')
     word = word.replace(':', '：')
-    word = word.replace('·', '.')
+    word = word.replace('.', '·')
+    word = word.replace('-', '·')
+    word = word.replace(' ', '·')
     return word
 }
 
