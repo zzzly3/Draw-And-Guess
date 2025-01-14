@@ -2,7 +2,7 @@
   <div class="fullscreen column content-start">
     <div class="col-auto" style="overflow: auto; height: 75px;">
       <q-bar class="full-height full-width bg-header row justify-center">
-        <q-img src="~assets/qiao2.png" class="col-auto self-center" height="50px" width="50px" fit="scale-down" />
+        <q-img :src="`/qiao${qiao}.png`" class="col-auto self-center" height="50px" width="50px" fit="scale-down" @click="random_qiao" />
         <div class="text-center col-auto self-center" style="font-size: inherit">
           <span v-if="in_draw&&painter!==name" class="text-weight-bold text-accent">{{guest?answer:''}}（提示：{{hint}}）</span>
           <span v-else>常鸽 - 你想我拆</span>
@@ -104,6 +104,11 @@ defineOptions({
     PopupColorPicker
   }
 })
+
+const qiao = ref(4)
+const random_qiao = () => {
+  qiao.value = Math.floor(Math.random() * 4) + 1
+}
 
 const gameData = useGameData()
 const $q = useQuasar()
