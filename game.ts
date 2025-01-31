@@ -207,6 +207,16 @@ export class DrawAndGuess
         return this.players.has(player.token)
     }
 
+    validate_name(name: string) {
+        if (name.length < 2 || name.length > 9)
+            return false
+        for (let player of this.players.values()) {
+            if (player.name === name)
+                return false
+        }
+        return true
+    }
+
     join(player: Player) {
         if (this.players.has(player.token)) {
             const p = this.players.get(player.token)
