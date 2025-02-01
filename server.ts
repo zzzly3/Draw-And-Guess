@@ -35,7 +35,7 @@ io.on("connection", socket => {
         })
     })
     socket.on('login', ({token, name}: {token: number, name: string}) => {
-        console.log('(connect)', token, name)
+        console.log('(connect)', new Date().toLocaleString(), token, name)
         if (!token || !name || isNaN(token))
             return
         name = name.trim()
