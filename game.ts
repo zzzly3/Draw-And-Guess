@@ -207,14 +207,14 @@ export class DrawAndGuess
         return this.players.has(player.token)
     }
 
-    validate_name(name: string) {
+    check_name(token: number, name: string) {
         if (name.length < 2 || name.length > 9)
-            return false
+            return '名字长度应在2-9之间'
         for (let player of this.players.values()) {
-            if (player.name === name)
-                return false
+            if (player.name === name && player.token !== token)
+                return '名字已被使用'
         }
-        return true
+        return ''
     }
 
     join(player: Player) {

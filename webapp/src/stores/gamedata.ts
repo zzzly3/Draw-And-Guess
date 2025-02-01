@@ -110,7 +110,7 @@ export const useGameData = defineStore('gamedata', {
         return
       this.token = token
       this.name = name
-      this.guest = name.toLocaleLowerCase() === 'guest'
+      this.guest = name.toLocaleLowerCase() === ''
       if (socket) {
         socket.connect()
         return
@@ -129,6 +129,20 @@ export const useGameData = defineStore('gamedata', {
       })
       socket.on('disconnect', () => {
         this.connect = false
+      })
+      socket.on('alert', (data: {title: string, message: string, reload: boolean, reset_name: boolean, reset_token: boolean}) => {
+        Dialog.create({
+          title: data.title,
+          message: data.message,
+          persistent: true
+        }).onDismiss(() => {
+          if (data.reset_token)
+            localStorage.removeItem('token')
+          if (data.reset_name)
+            sessionStorage.removeItem('name')
+          if (data.reload)
+            location.reload()
+        })
       })
       socket.on('update-all', (data: GameInfo) => {
         this.info = data
@@ -212,9 +226,9 @@ export const useGameData = defineStore('gamedata', {
       socket.on('leave', (user: {name: string}) => {
         this.add_msg(user.name + '离开了游戏')
       })
-      socket.on('draw', (data: {from: number, type: string, points: [number, number][]}) => {
+      socket.on('draw', (data: {from: string, type: string, points: [number, number][]}) => {
         // console.log(data)
-        if (data.from === token % 100003)
+        if (data.from === name)
           return
         drawfn(data.type, data.points)
       })

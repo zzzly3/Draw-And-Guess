@@ -36,11 +36,15 @@ io.on("connection", socket => {
     })
     socket.on('login', ({token, name}: {token: number, name: string}) => {
         console.log('(connect)', token, name)
-        if (!token || !name)
+        if (!token || !name || isNaN(token))
             return
         name = name.trim()
-        if (!game.validate_name(name))
+        token = Number(token)
+        const check = game.check_name(token, name)
+        if (check !== '') {
+            socket.emit('alert', {title: '登录失败', message: check, reload: true, reset_name: true, reset_token: false})
             return
+        }
         emitter.join(token, socket)
         let player = new Player(token, name, emitter)
         player = game.join(player)
@@ -60,7 +64,7 @@ io.on("connection", socket => {
             player.update_icon(String(icon))
         })
         socket.on('draw', (data: {type: string, points: [number, number][]}) => {
-            whiteboard.add_action(player.token, {type: data.type, points: data.points})
+            whiteboard.add_action(player.name, {type: data.type, points: data.points})
         })
         socket.on('disconnect', () => {
             if (emitter.validate(player.token, socket)) {

@@ -338,7 +338,8 @@ onMounted(() => {
       const show_login = () => {
         $q.dialog({
           title: '登录',
-          message: '输入一个昵称（2-9个字）或输入guest进入旁观模式',
+          message: '输入一个昵称（2-9个字）',
+          cancel: '旁观模式',
           prompt: {
             model: '',
             isValid: val => val.trim().length >= 2 && val.trim().length <= 9,
@@ -349,12 +350,22 @@ onMounted(() => {
           name = String(data).trim()
           sessionStorage.setItem('name', name)
           gameData.do_connect(token, name, drawfn)
+        }).onCancel(() => {
+          gameData.do_connect(token, '', drawfn)
         })
       }
       if (navigator.userAgent.indexOf('WeChat') >= 0) {
         $q.dialog({
           title: '提示',
-          message: '您正在微信APP内打开本游戏，可能导致您回复微信消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。',
+          message: '您正在微信内打开本游戏，可能导致您回复微信消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。',
+          persistent: true
+        }).onDismiss(() => {
+          show_login()
+        })
+      } else if (navigator.userAgent.indexOf('MQQBrowser') >= 0) {
+        $q.dialog({
+          title: '提示',
+          message: '您正在QQ内打开本游戏，可能导致您回复QQ消息时意外断线且无法正确重连。为了您的游戏体验，强烈建议您改用浏览器打开本游戏。',
           persistent: true
         }).onDismiss(() => {
           show_login()
