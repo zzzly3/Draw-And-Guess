@@ -22,7 +22,7 @@ export class Whiteboard
     }
     send_actions(target: number) {
         for (let action of this.actions) {
-            this.emitter.emit(target, 'draw', {from: 0, type: action.type, points: action.points})
+            this.emitter.emit(target, 'draw', {from: '', type: action.type, points: action.points})
         }
     }
 }
