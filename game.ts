@@ -359,8 +359,12 @@ export class DrawAndGuess
 
     private end() {
         // Game End
-        this.update_all()
-        this.emit('end')
+        // this.update_all()
+        const data: {name: string, point: number}[] = []
+        this.players.forEach(player => {
+            data.push({name: player.name, point: player.get_point()})
+        })
+        this.emit('end', data)
         this.players.forEach(p => p.reward_credit())
         this.reset()
     }

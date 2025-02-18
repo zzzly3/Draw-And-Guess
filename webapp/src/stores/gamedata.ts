@@ -166,9 +166,9 @@ export const useGameData = defineStore('gamedata', {
         console.log('start')
         this.add_msg('咕咕咕，游戏开始！')
       })
-      socket.on('end', () => {
+      socket.on('end', (data: {name: string, point: number}[]) => {
         console.log('end')
-        rank = this.info.players.map(p => ({score: p.point, name: p.name})).sort((a, b) => {
+        rank = data.map(p => ({score: p.point, name: p.name})).sort((a, b) => {
             if (a.score < b.score)
               return 1
             else if (a.score > b.score)

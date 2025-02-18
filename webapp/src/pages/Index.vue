@@ -105,9 +105,9 @@ defineOptions({
   }
 })
 
-const qiao = ref(7)
+const qiao = ref(8)
 const random_qiao = () => {
-  qiao.value = Math.floor(Math.random() * 7) + 1
+  qiao.value = Math.floor(Math.random() * 8) + 1
 }
 
 const gameData = useGameData()
