@@ -213,7 +213,7 @@ const long_press_user = (p: Player) => {
 const show_recovery = () => {
   $q.dialog({
     title: '恢复码',
-    message: '当您需要使用另一台设备继续游戏时，可在昵称输入框中填写恢复码（含开头的recovery）以恢复当前用户状态。使用恢复码时，务必确保上一台设备已关闭游戏页面。',
+    message: '当您需要使用另一台设备（或另一个浏览器）继续游戏时，可在昵称输入框中填写恢复码（含开头的recovery）以恢复当前用户状态。使用恢复码时，务必确保上一台设备已关闭游戏页面。',
     prompt: {
       model: 'recovery:' + btoa(JSON.stringify({token: gameData.token, name: gameData.name})),
       type: 'text',
