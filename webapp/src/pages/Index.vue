@@ -16,7 +16,8 @@
     </div>
     <div class="col-auto full-width text-center q-px-sm q-pt-sm" style="overflow: auto">
       <div class="q-pa-sm text-center q-gutter-sm">
-        <q-chip v-for="p in players_list_show" :key="p.name" clickable @click="click_user(p)" v-touch-hold.mouse="long_click_user(p)" v-ripple
+        <q-chip v-for="p in players_list_show" :key="p.name" clickable v-ripple
+                @click="click_user(p)" v-touch-hold.mouse="() => long_press_user(p)"
                 :color="p.action ? 'accent' : (p.success ? 'positive' : p.local_bg_color)"
                 :text-color="p.action ? 'white' : (p.success ? 'white' : '')"
                 :icon="p.action ? 'brush' : (p.success ? 'check' : p.icon)">
@@ -203,19 +204,22 @@ const click_user = (p: Player) => {
     show_offline.value = false
 }
 
-const long_click_user = (p: Player) => {
-  // console.log(p)
+const long_press_user = (p: Player) => {
   if (p.name === name.value) {
-    $q.dialog({
-      title: '恢复码',
-      message: '当您需要使用另一台设备继续游戏时，可在昵称输入框中填写【recovery:xxx】格式的恢复码以恢复当前用户状态。使用恢复码时，务必确保上一台设备已关闭游戏页面。',
-      prompt: {
-        model: 'recovery:' + btoa(JSON.stringify({token: gameData.token, name: gameData.name})),
-        type: 'text',
-        readonly: true
-      },
-    })
+    show_recovery()
   }
+}
+
+const show_recovery = () => {
+  $q.dialog({
+    title: '恢复码',
+    message: '当您需要使用另一台设备继续游戏时，可在昵称输入框中填写【recovery:xxx】格式的恢复码以恢复当前用户状态。使用恢复码时，务必确保上一台设备已关闭游戏页面。',
+    prompt: {
+      model: 'recovery:' + btoa(JSON.stringify({token: gameData.token, name: gameData.name})),
+      type: 'text',
+      readonly: true
+    },
+  })
 }
 
 const send_text = ref('')
