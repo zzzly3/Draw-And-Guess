@@ -16,7 +16,7 @@
     </div>
     <div class="col-auto full-width text-center q-px-sm q-pt-sm" style="overflow: auto">
       <div class="q-pa-sm text-center q-gutter-sm">
-        <q-chip v-for="p in players_list_show" :key="p.name" clickable @click="click_user(p)" v-ripple
+        <q-chip v-for="p in players_list_show" :key="p.name" clickable @click="click_user(p)" v-touch-hold.mouse="long_click_user(p)" v-ripple
                 :color="p.action ? 'accent' : (p.success ? 'positive' : p.local_bg_color)"
                 :text-color="p.action ? 'white' : (p.success ? 'white' : '')"
                 :icon="p.action ? 'brush' : (p.success ? 'check' : p.icon)">
@@ -203,6 +203,21 @@ const click_user = (p: Player) => {
     show_offline.value = false
 }
 
+const long_click_user = (p: Player) => {
+  // console.log(p)
+  if (p.name === name.value) {
+    $q.dialog({
+      title: '恢复码',
+      message: '当您需要使用另一台设备继续游戏时，可在昵称输入框中填写【recovery:xxx】格式的恢复码以恢复当前用户状态。使用恢复码时，务必确保上一台设备已关闭游戏页面。',
+      prompt: {
+        model: 'recovery:' + btoa(JSON.stringify({token: gameData.token, name: gameData.name})),
+        type: 'text',
+        readonly: true
+      },
+    })
+  }
+}
+
 const send_text = ref('')
 const send = () => {
   if (send_text.value) {
@@ -343,13 +358,31 @@ onMounted(() => {
           cancel: '旁观模式',
           prompt: {
             model: '',
-            isValid: val => val.trim().length >= 2 && val.trim().length <= 9,
+            isValid: val => (val.trim().length >= 2 && val.trim().length <= 9) || val.trim().startsWith('recovery:'),
             type: 'text'
           },
           persistent: true
         }).onOk(data => {
           name = String(data).trim()
           sessionStorage.setItem('name', name)
+          if (name.startsWith('recovery:')) {
+            try {
+              const recovery = JSON.parse(atob(name.slice(9)))
+              token = Number(recovery.token)
+              name = String(recovery.name)
+              localStorage.setItem('token', String(token))
+              sessionStorage.setItem('name', name)
+            } catch (e) {
+              $q.dialog({
+                title: '错误',
+                message: '无效的恢复码',
+                persistent: true
+              }).onDismiss(() => {
+                location.reload()
+              })
+              return
+            }
+          }
           gameData.do_connect(token, name, drawfn)
         }).onCancel(() => {
           gameData.do_connect(token, '', drawfn)

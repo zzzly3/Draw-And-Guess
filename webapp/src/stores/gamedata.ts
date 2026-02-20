@@ -123,7 +123,7 @@ export const useGameData = defineStore('gamedata', {
           socket.emit('login', {token, name})
         this.connect = true
         if (first_connect) {
-          this.add_msg( '【提示】建议您在系统浏览器中打开本游戏，启用全屏模式体验更佳~')
+          this.add_msg( '【提示】建议您在系统浏览器中打开本游戏，启用全屏模式体验更佳~ 如需更换设备继续游戏，可长按您的用户名复制恢复码~')
           first_connect = false
         }
       })
