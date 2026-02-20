@@ -215,7 +215,7 @@ const show_recovery = () => {
     title: '恢复码',
     message: '当您需要使用另一台设备（或另一个浏览器）继续游戏时，可在昵称输入框中填写恢复码（含开头的recovery）以恢复当前用户状态。使用恢复码时，务必确保上一台设备已关闭游戏页面。',
     prompt: {
-      model: 'recovery:' + btoa(JSON.stringify({token: gameData.token, name: gameData.name})),
+      model: 'recovery:' + String(gameData.token),
       type: 'text',
       readonly: true
     },
@@ -355,10 +355,10 @@ onMounted(() => {
       localStorage.setItem('token', String(token))
     }
     if (!name) {
-      const show_login = () => {
+      const show_login = (recovery: boolean = false) => {
         $q.dialog({
           title: '登录',
-          message: '输入一个昵称（2-9个字）',
+          message: (recovery ? '（已使用恢复码）' : '') + '输入一个昵称（2-9个字）',
           cancel: '旁观模式',
           prompt: {
             model: '',
@@ -366,16 +366,12 @@ onMounted(() => {
             type: 'text'
           },
           persistent: true
-        }).onOk(data => {
-          name = String(data).trim()
-          sessionStorage.setItem('name', name)
-          if (name.startsWith('recovery:')) {
+        }).onOk(input => {
+          const data = String(input).trim()
+          if (!recovery && data.startsWith('recovery:')) {
             try {
-              const recovery = JSON.parse(atob(name.slice(9)))
-              token = Number(recovery.token)
-              name = String(recovery.name)
+              token = Number(data.slice(9))
               localStorage.setItem('token', String(token))
-              sessionStorage.setItem('name', name)
             } catch (e) {
               $q.dialog({
                 title: '错误',
@@ -386,8 +382,12 @@ onMounted(() => {
               })
               return
             }
+            show_login(recovery=true)
+          } else {
+            name = data
+            sessionStorage.setItem('name', name)
+            gameData.do_connect(token, name, drawfn)
           }
-          gameData.do_connect(token, name, drawfn)
         }).onCancel(() => {
           gameData.do_connect(token, '', drawfn)
         })
