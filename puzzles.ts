@@ -34,6 +34,7 @@ export function count_hints() {
 
 export function format_variants(word: string) {
     word = word.trim().toUpperCase()
+    word = word.replace('〇', '零')
     word = word.replace('0', '零')
     word = word.replace('1', '一')
     word = word.replace('2', '二')
@@ -45,7 +46,6 @@ export function format_variants(word: string) {
     word = word.replace('8', '八')
     word = word.replace('9', '九')
     word = word.replace(',', '，')
-    word = word.replace('.', '。')
     word = word.replace('?', '？')
     word = word.replace('!', '！')
     word = word.replace(';', '；')
